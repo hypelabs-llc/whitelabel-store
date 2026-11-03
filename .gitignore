@@ -20,6 +20,3 @@ build/
 # Archived Vite frontend source (v1) — ignored during the Next.js migration
 src/v1
 .vercel
-
-# pnpm-generated local config (minimumReleaseAgeExclude churns on every install)
-pnpm-workspace.yaml
