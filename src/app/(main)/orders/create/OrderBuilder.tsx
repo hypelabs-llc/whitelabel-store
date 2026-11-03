@@ -14,7 +14,8 @@ import { IspSelector } from "./IspSelector";
 import { CapabilitySelector } from "./CapabilitySelector";
 import { BillingCycleSelector } from "./BillingCycleSelector";
 import { PaymentMethodSelector } from "./PaymentMethodSelector";
-import { OrderSummary } from "./OrderSummary";
+import { OrderSummaryPanel } from "./OrderSummaryPanel";
+import { OrderSummaryDrawer } from "./OrderSummaryDrawer";
 
 // Only crypto is offered for now.
 const PAYMENT_METHODS: PaymentMethods[] = [PaymentMethodsObject.Cryptocurrency];
@@ -155,9 +156,29 @@ export function OrderBuilder() {
 		});
 	};
 
+	// Shared by the sticky desktop summary and the mobile Vaul drawer.
+	const summaryProps = {
+		location,
+		isp,
+		currency,
+		unitPrice,
+		total,
+		preview,
+		quantity,
+		maxQuantity,
+		onQuantityChange: setQuantity,
+		autoRenew,
+		onAutoRenewChange: setAutoRenew,
+		showAutoRenew: !isCrypto,
+		canOrder,
+		submitting,
+		onOrder: submit,
+	};
+
 	return (
 		<div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-16">
-			<div className="space-y-12">
+			{/* Extra bottom padding on mobile so the last step isn't hidden behind the drawer's peek. */}
+			<div className="space-y-12 pb-40 lg:pb-0">
 				<Heading title={t("orderDialog.title")} subtitle={t("orderDialog.subtitle")} />
 
 				<LocationSelector index="01" locations={locations} loading={loadingLocations} selectedId={locationId} onSelect={setLocationId} />
@@ -167,23 +188,9 @@ export function OrderBuilder() {
 				<PaymentMethodSelector index="05" methods={PAYMENT_METHODS} value={paymentMethod} onChange={setPaymentMethod} />
 			</div>
 
-			<OrderSummary
-				location={location}
-				isp={isp}
-				currency={currency}
-				unitPrice={unitPrice}
-				total={total}
-				preview={preview}
-				quantity={quantity}
-				maxQuantity={maxQuantity}
-				onQuantityChange={setQuantity}
-				autoRenew={autoRenew}
-				onAutoRenewChange={setAutoRenew}
-				showAutoRenew={!isCrypto}
-				canOrder={canOrder}
-				submitting={submitting}
-				onOrder={submit}
-			/>
+			{/* Sticky panel on desktop, Vaul bottom-sheet on mobile. */}
+			<OrderSummaryPanel {...summaryProps} />
+			<OrderSummaryDrawer {...summaryProps} />
 		</div>
 	);
 }
