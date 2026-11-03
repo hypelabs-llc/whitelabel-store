@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* Dark mode is toggled by next-themes via the `dark` class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	/* Inter is wired via next/font in the root layout (--font-inter). */
+	--font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+	--radius-sm: 6px;
+	--radius-md: 8px;
+	--radius-lg: 11px;
+	--radius-xl: 16px;
+
+	/* ONE base color in OKLCH (--base-c chroma + --base-h hue) drives the whole chrome. Every surface,
+	   border and text is that same chroma/hue at a different perceptual LIGHTNESS (--l-*). OKLCH keeps
+	   the tint perceptually identical at every lightness (unlike HSL), so no zone looks more/less
+	   tinted than another. Rotate --base-h to retint the entire UI; --base-c = how colorful the greys
+	   are (0 = pure neutral). The only separate chromatic accent is the per-tenant --brand-color. */
+	--color-surface: oklch(var(--l-surface) var(--base-c) var(--base-h));
+	--color-surface-muted: oklch(var(--l-muted-bg) var(--base-c) var(--base-h));
+	--color-surface-elevated: oklch(var(--l-elevated) var(--base-c) var(--base-h));
+	--color-line: oklch(var(--l-line) var(--base-c) var(--base-h));
+	--color-line-strong: oklch(var(--l-line-strong) var(--base-c) var(--base-h));
+	--color-muted: oklch(var(--l-text-muted) var(--base-c) var(--base-h));
+	--color-fg: oklch(var(--l-fg) var(--base-c) var(--base-h));
+	--color-fg-strong: oklch(var(--l-fg-strong) var(--base-c) var(--base-h));
+
+	--color-brand: var(--brand-color);
+	--color-brand-soft: var(--brand-color-soft);
+	--color-brand-contrast: var(--brand-text-color);
+}
+
+:root {
+	/* THE base color (OKLCH). One hue + one chroma for the whole neutral chrome. Rotate --base-h to
+	   retint everything; set --base-c to 0 for pure neutral grey. */
+	--base-h: 265;
+	--base-c: 0; /* 0 = pure neutral grey (no tint). Raise it to retint the chrome. */
+
+	/* Per-token perceptual lightness — LIGHT theme (0–1). */
+	--l-surface: 0.995;
+	--l-muted-bg: 0.975;
+	--l-elevated: 1;
+	--l-line: 0.93;
+	--l-line-strong: 0.89;
+	--l-text-muted: 0.55;
+	--l-fg: 0.37;
+	--l-fg-strong: 0.21;
+
+	/* Per-tenant brand accent (set at runtime for white-label). Grey placeholder until configured. */
+	--brand-color-light: #52525b;
+	--brand-color-dark: #a1a1aa;
+	--brand-text-color-light: #ffffff;
+	--brand-text-color-dark: #09090b;
+	--brand-color: var(--brand-color-light);
+	--brand-text-color: var(--brand-text-color-light);
+	--brand-color-emphasis: color-mix(in srgb, var(--brand-color) 80%, transparent);
+	--brand-color-soft: color-mix(in srgb, var(--brand-color) 14%, transparent);
+}
+
+/* DARK theme — same base hue/sat, base lightness moves to the bottom; offsets step UP. */
+html.dark {
+	--brand-color: var(--brand-color-dark);
+	--brand-text-color: var(--brand-text-color-dark);
+
+	--base-c: 0; /* pure neutral grey in dark too */
+
+	/* Per-token perceptual lightness — DARK theme (0–1). */
+	--l-surface: 0.205;
+	--l-muted-bg: 0.19;
+	--l-elevated: 0.245;
+	--l-line: 0.26;
+	--l-line-strong: 0.32;
+	--l-text-muted: 0.65;
+	--l-fg: 0.86;
+	--l-fg-strong: 0.97;
+}
+
+html {
+	font-family: var(--font-sans);
+	font-optical-sizing: auto;
+	/* Base type size: all rem-based utilities (text-sm, text-base…) scale from here. */
+	font-size: 17px;
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	background: var(--color-surface-muted);
+	color: var(--color-fg);
+	font-size: 1rem; /* 16px — comfortable default body size */
+	line-height: 1.55;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	/* Inter stylistic sets: open 'a'/'g', tidier punctuation — the crisp modern look. */
+	font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--color-line-strong);
+	border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+label.required::after {
+	content: "*";
+	color: #ef4444;
+	padding-left: 0.5rem;
+}

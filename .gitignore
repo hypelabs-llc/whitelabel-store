@@ -1,0 +1,25 @@
+.vs
+.vscode
+.idea
+.claude
+**/.DS_Store
+*.DotSettings.user
+
+# Node / Next.js build artifacts (ignored at any depth)
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Env files (never commit secrets, e.g. the Partner API key)
+.env
+.env.*
+!.env.example
+
+# Archived Vite frontend source (v1) — ignored during the Next.js migration
+src/v1
+.vercel
+
+# pnpm-generated local config (minimumReleaseAgeExclude churns on every install)
+pnpm-workspace.yaml
