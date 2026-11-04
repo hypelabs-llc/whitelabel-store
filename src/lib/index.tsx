@@ -2,13 +2,27 @@
 
 import axios from "axios";
 
-export const getReadableTextColor = (hexColor: string): "black" | "white" => {
-	const hex = hexColor.replace("#", "");
-	const r = parseInt(hex.substring(0, 2), 16);
-	const g = parseInt(hex.substring(2, 4), 16);
-	const b = parseInt(hex.substring(4, 6), 16);
-	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-	return luminance > 0.5 ? "black" : "white";
+// Pick black or white for text on a given background, using WCAG relative luminance (sRGB linearized
+// and channel-weighted) — more accurate than a naive average, so vivid colors like magenta correctly
+// get white text. Falls back to white on a malformed hex.
+export const getReadableTextColor = (background: string): "#000000" | "#FFFFFF" => {
+	const hex = background.replace("#", "").trim();
+	const full =
+		hex.length === 3
+			? hex
+					.split("")
+					.map((char) => char + char)
+					.join("")
+			: hex;
+	if (full.length !== 6 || /[^0-9a-fA-F]/.test(full)) return "#FFFFFF";
+
+	const channel = (start: number) => {
+		const value = parseInt(full.slice(start, start + 2), 16) / 255;
+		return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+	};
+	const luminance = 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+
+	return luminance > 0.5 ? "#000000" : "#FFFFFF";
 };
 
 export const getCachedConfiguration = <T extends any>(): T | undefined => {
