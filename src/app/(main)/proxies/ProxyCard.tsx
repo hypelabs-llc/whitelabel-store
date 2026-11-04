@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardList, Copy, Globe, Info, KeyRound, Pencil, Timer } from "lucide-react";
+import { ClipboardList, Copy, Globe, Info, KeyRound, Loader2, Pencil, Sparkles, Timer } from "lucide-react";
 import UpdateCommentDialog from "./UpdateCommentDialog";
 import { Badge, Button, Card, Tooltip } from "@/components/ui";
 import { CheckProxyButton } from "./CheckProxyButton";
 import { CopyableId, ispIconUrl } from "@/lib";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "sonner";
-import { useConfiguration } from "@/contexts/configuration";
-import { useSession } from "@/lib/useSession";
 import axios from "axios";
 import { mutate } from "swr";
 import { differenceInDays, differenceInHours } from "date-fns";
+import { getIpRotationLink } from "@/lib/actions/proxy";
 import RotateIpButton from "./RotateIpButton";
 import ChangeCredentialsDialog from "./ChangeCredentialsDialog";
 import IpRotationDialog from "./IpRotationDialog";
@@ -44,14 +43,25 @@ function CopyRow({ label, value, info }: { label: string; value?: string | null;
 
 export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Proxy>; onReportIncident?: (proxyId: string) => void }) {
 	const { t } = useTranslation();
-	const configuration = useConfiguration();
-	const { user } = useSession();
-	const rotationKey = user?.userId ? btoa(user.userId) : "";
 	const proxyId = proxy.id ?? "";
-	const ipRotationUrl = `https://${configuration?.store?.domain}/services/rotate-ip/${proxyId}?key=${encodeURIComponent(rotationKey)}`;
 	const [commentOpen, setCommentOpen] = useState(false);
 	const [credentialsOpen, setCredentialsOpen] = useState(false);
 	const [rotationOpen, setRotationOpen] = useState(false);
+	// The IP rotation link is generated on demand: the field starts empty and "Generate" fetches it.
+	const [rotationLink, setRotationLink] = useState("");
+	const [generatingLink, setGeneratingLink] = useState(false);
+	const generateLink = async () => {
+		setGeneratingLink(true);
+		try {
+			const result = await getIpRotationLink(proxyId);
+			if (result?.link) setRotationLink(result.link);
+			else toast.error(t("proxies.rotationLinkFail"));
+		} catch {
+			toast.error(t("proxies.rotationLinkFail"));
+		} finally {
+			setGeneratingLink(false);
+		}
+	};
 	const handleUpdateComment = (comment: string) => {
 		axios
 			.post(`/api/proxies/${proxyId}/comment`, { comment })
@@ -105,20 +115,45 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 
 			<div className={"space-y-1.5"}>
 				<label className={"text-sm font-medium text-fg-strong"}>{t("proxies.ipRotationLink")}</label>
-				<div className={"flex items-center gap-1.5 overflow-hidden rounded-md border border-line bg-surface-muted px-3 pr-1.5"}>
-					<Globe className={"h-4 w-4 shrink-0 text-muted"} />
-					<input className={"min-w-0 flex-1 truncate border-0 bg-transparent py-2.5 text-sm text-fg ring-0 focus:border-0 focus:ring-0"} value={ipRotationUrl} readOnly />
-					<CopyToClipboard text={ipRotationUrl} onCopy={() => toast.success(t("proxies.copied"))}>
-						<button type={"button"} className={"shrink-0 rounded p-1.5 text-muted transition-colors hover:text-brand"}>
-							<Copy className={"h-4 w-4"} />
+				<div className={"relative"}>
+					{/* The field keeps the same box on every card. Until the link is generated, a "scratch-card"
+					    overlay sits on top: a blurred teaser underneath, a reveal button on top. */}
+					<div className={"flex items-center gap-1.5 overflow-hidden rounded-md border border-line bg-surface-muted px-3 pr-1.5"}>
+						<Globe className={"h-4 w-4 shrink-0 text-muted"} />
+						<input
+							className={"min-w-0 flex-1 truncate border-0 bg-transparent py-2.5 font-mono text-sm text-fg ring-0 focus:border-0 focus:ring-0"}
+							value={rotationLink || "https://••••••••••••••••••••••••••••"}
+							readOnly
+							aria-hidden={!rotationLink}
+						/>
+						<CopyToClipboard text={rotationLink} onCopy={() => toast.success(t("proxies.copied"))}>
+							<button type={"button"} disabled={!rotationLink} className={"shrink-0 rounded p-1.5 text-muted transition-colors hover:text-brand disabled:opacity-40 disabled:hover:text-muted"}>
+								<Copy className={"h-4 w-4"} />
+							</button>
+						</CopyToClipboard>
+					</div>
+					{!rotationLink && (
+						<button
+							type={"button"}
+							onClick={generateLink}
+							disabled={generatingLink}
+							className={
+								"group/scratch absolute inset-0 flex items-center justify-center gap-2 rounded-md text-sm font-medium text-fg-strong " +
+								"bg-surface-muted/60 backdrop-blur-[3px] transition-colors hover:bg-surface-muted/40 disabled:cursor-wait"
+							}
+						>
+							<span className={"pointer-events-none flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 shadow-sm transition-transform group-hover/scratch:scale-[1.02]"}>
+								{generatingLink ? <Loader2 className={"h-4 w-4 animate-spin"} /> : <Sparkles className={"h-4 w-4 text-brand"} />}
+								{t("proxies.generateRotationLink")}
+							</span>
 						</button>
-					</CopyToClipboard>
+					)}
 				</div>
 			</div>
 
 			<div className={"flex flex-wrap gap-2"}>
 				<CheckProxyButton id={proxyId} onDown={() => onReportIncident?.(proxyId)} />
-				<RotateIpButton id={proxyId} rotationKey={rotationKey} />
+				<RotateIpButton id={proxyId} />
 				<Button onClick={() => setRotationOpen(true)} icon={Timer} variant={"secondary"} className={"flex-1"}>
 					{t("proxies.autoRotation")}
 				</Button>

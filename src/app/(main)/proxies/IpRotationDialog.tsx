@@ -4,8 +4,8 @@ import { type FormEvent, useState } from "react";
 import { Button, Modal, TextInput } from "@/components/ui";
 import { Timer } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 import { mutate } from "swr";
+import { updateProxyIpRotation } from "@/lib/actions/proxy";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
@@ -15,13 +15,20 @@ export default function IpRotationDialog({ proxyId, interval, isOpen, onClose }:
 	const [minutes, setMinutes] = useState(interval ?? 20);
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		setLoading(true);
-		axios.post(`/api/services/ip-rotation/${proxyId}${enabled ? `?interval=${minutes}` : ""}`)
-			.then(() => { toast.success(t("rotationDialog.success")); mutate("/api/proxies"); onClose(); })
-			.catch((error) => toast.error(error.response?.data?.message ?? t("rotationDialog.fail")))
-			.finally(() => setLoading(false));
+		try {
+			// UI works in minutes; the action converts to seconds. null disables rotation.
+			await updateProxyIpRotation(proxyId, enabled ? minutes : null);
+			toast.success(t("rotationDialog.success"));
+			mutate("/api/proxies");
+			onClose();
+		} catch {
+			toast.error(t("rotationDialog.fail"));
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (

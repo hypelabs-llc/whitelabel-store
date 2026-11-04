@@ -3,20 +3,23 @@
 import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useState } from "react";
-import axios from "axios";
+import { triggerIpRotation } from "@/lib/actions/proxy";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-export default function RotateIpButton({ id, rotationKey }: { id: string; rotationKey: string }) {
+export default function RotateIpButton({ id }: { id: string }) {
 	const { t } = useTranslation();
 	const [loading, setLoading] = useState<boolean>(false);
-	const handleClick = () => {
+	const handleClick = async () => {
 		setLoading(true);
-		axios
-			.post(`/api/services/rotate-ip/${id}?key=${encodeURIComponent(rotationKey)}`)
-			.then(() => toast.success(t("proxies.rotateSuccess")))
-			.catch(() => toast.error(t("proxies.rotateFail")))
-			.finally(() => setLoading(false));
+		try {
+			await triggerIpRotation(id);
+			toast.success(t("proxies.rotateSuccess"));
+		} catch {
+			toast.error(t("proxies.rotateFail"));
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
