@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { ConfigurationProvider } from "@/contexts/configuration";
+import { CustomCode } from "@/components/CustomCode";
 import { getConfiguration } from "@/lib/connect";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 			<body className="h-full">
 				<ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="theme">
 					<ConfigurationProvider value={configuration}>
+						<CustomCode />
 						<Providers>{children}</Providers>
 					</ConfigurationProvider>
 				</ThemeProvider>
