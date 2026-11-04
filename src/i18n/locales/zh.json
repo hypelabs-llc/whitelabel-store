@@ -266,7 +266,10 @@
 		"splitFail": "拆分订单失败。",
 		"days": "{{count}} 天",
 		"hours": "{{count}} 小时",
-		"trial": "试用"
+		"minutes": "{{count}} 分钟",
+		"trial": "试用",
+		"extend": "续订",
+		"cancel": "取消"
 	},
 	"support": {
 		"heading": "我们随时为您服务",
@@ -563,5 +566,24 @@
 	"sidebar": {
 		"ctaTitle": "需要更多代理？",
 		"ctaSubtitle": "几秒内即可扩展——定期新增节点。"
+	},
+	"extendOrderDialog": {
+		"title": "续订订单",
+		"subtitle": "将此订单续订一个计费周期。",
+		"billingCycle": "计费周期",
+		"dismiss": "取消",
+		"confirm": "续订",
+		"success": "订单已续订。",
+		"fail": "无法续订该订单。"
+	},
+	"cancelOrderDialog": {
+		"title": "取消订单",
+		"subtitle": "这将停止订单续订。默认情况下，已付费周期会保留到到期。",
+		"immediate": "立即取消",
+		"immediateHelp": "立即结束订单，而不是在已付费周期结束时。",
+		"dismiss": "保留订单",
+		"confirm": "取消订单",
+		"success": "订单已取消。",
+		"fail": "无法取消该订单。"
 	}
 }

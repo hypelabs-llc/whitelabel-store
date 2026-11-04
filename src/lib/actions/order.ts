@@ -11,7 +11,7 @@
 import { getConnect } from "@/lib/connect";
 import { auth } from "@/auth";
 import { toPlain } from "@hypelabs-llc/ts-sdk";
-import type { PreviewOrderResponse, CreateOrderResponse, Plain } from "@hypelabs-llc/ts-sdk";
+import type { PreviewOrderResponse, CreateOrderResponse, ExtendOrderRequest, ExtendOrderResponse, Plain } from "@hypelabs-llc/ts-sdk";
 import type { BillingCycles, PaymentMethods, CapabilityTypes } from "@hypelabs-llc/ts-sdk";
 
 export interface OrderSelection {
@@ -64,4 +64,20 @@ export async function createOrder(
 		criteria: orderCriteria(selection, paymentMethod),
 	});
 	return order ? toPlain(order) : null;
+}
+
+/** Renews an existing order for another billing cycle. Returns the extend result (may carry a payment url). */
+export async function extendOrder(orderId: string, request: ExtendOrderRequest): Promise<Plain<ExtendOrderResponse> | null> {
+	if (!orderId) throw new Error("orderId is required");
+	const result = await getConnect().orders.byId(orderId).extend.post(request);
+	return result ? toPlain(result) : null;
+}
+
+/**
+ * Cancels an order: stops it renewing. By default the paid period is kept until expiry; pass
+ * `immediate` to end it now. (Refunds aren't requested here.)
+ */
+export async function cancelOrder(orderId: string, immediate = false): Promise<void> {
+	if (!orderId) throw new Error("orderId is required");
+	await getConnect().orders.byId(orderId).delete({ immediateCancellation: immediate, askRefund: false });
 }

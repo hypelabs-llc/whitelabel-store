@@ -270,7 +270,10 @@
 		"splitFail": "Failed to split purchase.",
 		"days": "{{count}}d",
 		"hours": "{{count}}h",
-		"trial": "Trial"
+		"minutes": "{{count}}m",
+		"trial": "Trial",
+		"extend": "Extend",
+		"cancel": "Cancel"
 	},
 	"support": {
 		"heading": "We're here to help",
@@ -567,5 +570,24 @@
 	"sidebar": {
 		"ctaTitle": "Need more proxies?",
 		"ctaSubtitle": "Scale up in seconds — new locations added regularly."
+	},
+	"extendOrderDialog": {
+		"title": "Extend order",
+		"subtitle": "Renew this order for another billing cycle.",
+		"billingCycle": "Billing cycle",
+		"dismiss": "Cancel",
+		"confirm": "Extend",
+		"success": "Order extended.",
+		"fail": "Could not extend the order."
+	},
+	"cancelOrderDialog": {
+		"title": "Cancel order",
+		"subtitle": "This stops the order from renewing. By default the paid period is kept until it expires.",
+		"immediate": "Cancel immediately",
+		"immediateHelp": "End the order now instead of at the end of the paid period.",
+		"dismiss": "Keep order",
+		"confirm": "Cancel order",
+		"success": "Order cancelled.",
+		"fail": "Could not cancel the order."
 	}
 }

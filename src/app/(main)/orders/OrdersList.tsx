@@ -1,20 +1,30 @@
 "use client";
 import { useState } from "react";
-import { Badge, Button, Card, EmptyState, Heading } from "@/components/ui";
-import { Package, ShoppingCart, Sparkles, Split } from "lucide-react";
-import useSWR, { mutate } from "swr";
-import { format, differenceInDays, differenceInHours, isValid } from "date-fns";
+import { Badge, Button, EmptyState, Heading } from "@/components/ui";
+import { History, Package, ShoppingCart, Sparkles, XCircle } from "lucide-react";
+import useSWR from "swr";
+import { format, differenceInDays, differenceInHours, differenceInMinutes, isValid } from "date-fns";
 import { CopyableId } from "@/lib";
 import Link from "next/link";
-import axios from "axios";
-import { toast } from "sonner";
 import type { Order, Plain } from "@hypelabs-llc/ts-sdk";
-import ConfirmDialog from "@/components/ConfirmDialog";
+import ExtendOrderDialog from "./ExtendOrderDialog";
+import CancelOrderDialog from "./CancelOrderDialog";
 import { useTranslation } from "react-i18next";
 
 // Count of delivered resources (proxies) across an order's line items.
 function resourceCount(order: Plain<Order>): number {
 	return (order.items ?? []).reduce((total, item) => total + (item.resourceIds?.length ?? 0), 0);
+}
+
+// Time remaining as the finest useful unit: days when >= 1 day, else hours when >= 1 hour, else minutes
+// (so an order expiring in under an hour shows "45m" rather than "0h"). Clamped at zero.
+function timeLeft(expiresAt: Date): { value: number; unit: "days" | "hours" | "minutes" } {
+	const now = new Date();
+	const days = differenceInDays(expiresAt, now);
+	if (days >= 1) return { value: days, unit: "days" };
+	const hours = differenceInHours(expiresAt, now);
+	if (hours >= 1) return { value: hours, unit: "hours" };
+	return { value: Math.max(0, differenceInMinutes(expiresAt, now)), unit: "minutes" };
 }
 
 // Safe date format: the SDK dates can be null/invalid, so render a dash rather than crash.
@@ -28,20 +38,9 @@ export default function OrdersList() {
 	const { t } = useTranslation();
 	// Suspense mode: the page's <Suspense> shows the fallback while loading, so `orders` is defined here.
 	const { data: orders = [] } = useSWR<Plain<Order>[]>("/api/orders");
-	const [splitOrderId, setSplitOrderId] = useState<string | null>(null);
-	const splitOrder = orders.find((order) => order.id === splitOrderId);
+	const [extendOrderId, setExtendOrderId] = useState<string | null>(null);
+	const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
 	const hasOrders = orders.length > 0;
-
-	const handleSplit = async () => {
-		if (!splitOrderId) return;
-		await axios
-			.post(`/api/orders/${splitOrderId}/split`)
-			.then(() => {
-				toast.success(t("orders.splitSuccess"));
-				mutate("/api/orders");
-			})
-			.catch(() => toast.error(t("orders.splitFail")));
-	};
 
 	const statusTone = (status: string): "neutral" | "success" | "warning" | "danger" => {
 		switch (status) {
@@ -74,34 +73,31 @@ export default function OrdersList() {
 	}
 
 	return (
-		<section className={"flex flex-1 flex-col"}>
+		<section className={"space-y-6"}>
 			<Heading icon={Package} title={t("orders.title")} subtitle={t("orders.subtitle")} />
 
 			{hasOrders && (
-				<Card className={"overflow-hidden p-0"}>
+				<div className={"overflow-hidden rounded-xl border border-line"}>
 					<div className={"overflow-x-auto"}>
 						<table className={"w-full border-collapse text-sm"}>
 							<thead>
-								<tr className={"border-b border-line text-left text-xs font-medium uppercase tracking-wide text-muted"}>
-									<th className={"px-5 py-3 font-medium"}>{t("orders.purchase")}</th>
-									<th className={"px-5 py-3 font-medium"}>{t("orders.proxies")}</th>
-									<th className={"px-5 py-3 font-medium"}>{t("orders.expires")}</th>
-									<th className={"px-5 py-3 font-medium"}>{t("orders.status")}</th>
-									<th className={"px-5 py-3 text-right font-medium"}>{t("orders.actions")}</th>
+								<tr className={"border-b border-line bg-surface-muted text-left text-xs font-medium uppercase tracking-wider text-muted"}>
+									<th className={"px-5 py-2.5 font-medium"}>{t("orders.purchase")}</th>
+									<th className={"px-5 py-2.5 font-medium"}>{t("orders.proxies")}</th>
+									<th className={"px-5 py-2.5 font-medium"}>{t("orders.expires")}</th>
+									<th className={"px-5 py-2.5 font-medium"}>{t("orders.status")}</th>
+									<th className={"px-5 py-2.5 text-right font-medium"}>{t("orders.actions")}</th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody className={"divide-y divide-line"}>
 								{orders.map((order) => {
 									const status = order.status ?? "Pending";
 									const count = resourceCount(order);
 									const daysLeft = order.expiresAt ? differenceInDays(new Date(order.expiresAt), new Date()) : null;
-									const hoursLeft =
-										order.expiresAt && daysLeft === 0
-											? Math.max(0, differenceInHours(new Date(order.expiresAt), new Date()))
-											: null;
+									const expiry = order.expiresAt ? timeLeft(new Date(order.expiresAt)) : null;
 
 									return (
-										<tr key={order.id} className={"border-b border-line last:border-0 transition-colors hover:bg-surface-muted"}>
+										<tr key={order.id} className={"transition-colors hover:bg-surface-muted/40"}>
 											<td className={"px-5 py-3 text-fg-strong"}>
 												<div className={"flex items-center gap-3"}>
 													<span className={"flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand"}>
@@ -120,18 +116,30 @@ export default function OrdersList() {
 											<td className={"px-5 py-3"}>
 												<div className={"inline-flex items-center gap-2"}>
 													<Badge tone={statusTone(status)}>{status}</Badge>
-													{daysLeft !== null && status === "Active" && (
+													{expiry !== null && daysLeft !== null && status === "Active" && (
 														<Badge tone={expiryTone(daysLeft)}>
-															{daysLeft >= 1 ? t("orders.days", { count: daysLeft }) : t("orders.hours", { count: hoursLeft ?? 0 })}
+															{t(`orders.${expiry.unit}`, { count: expiry.value })}
 														</Badge>
 													)}
 												</div>
 											</td>
-											<td className={"px-5 py-3 text-right"}>
-												{status === "Active" && count > 1 && (
-													<Button variant={"secondary"} icon={Split} size={"xs"} onClick={() => setSplitOrderId(order.id ?? null)}>
-														{t("orders.split")}
-													</Button>
+											<td className={"px-5 py-3"}>
+												{order.isTrial ? (
+													// A trial has no extend/cancel actions — show an em dash instead.
+													<div className={"text-right text-muted"}>—</div>
+												) : (
+													<div className={"flex flex-wrap items-center justify-end gap-2"}>
+														{status === "Active" && (
+															<Button variant={"secondary"} icon={History} size={"xs"} onClick={() => setExtendOrderId(order.id ?? null)}>
+																{t("orders.extend")}
+															</Button>
+														)}
+														{(status === "Active" || status === "Pending") && (
+															<Button variant={"secondary"} icon={XCircle} size={"xs"} onClick={() => setCancelOrderId(order.id ?? null)}>
+																{t("orders.cancel")}
+															</Button>
+														)}
+													</div>
 												)}
 											</td>
 										</tr>
@@ -140,18 +148,11 @@ export default function OrdersList() {
 							</tbody>
 						</table>
 					</div>
-				</Card>
+				</div>
 			)}
 
-			<ConfirmDialog
-				isOpen={!!splitOrderId}
-				title={t("orders.splitTitle")}
-				message={t("orders.splitMessage", { count: splitOrder ? resourceCount(splitOrder) : 0 })}
-				confirmLabel={t("orders.split")}
-				confirmIcon={Split}
-				onConfirm={handleSplit}
-				onClose={() => setSplitOrderId(null)}
-			/>
+			<ExtendOrderDialog orderId={extendOrderId} isOpen={!!extendOrderId} onClose={() => setExtendOrderId(null)} />
+			<CancelOrderDialog orderId={cancelOrderId} isOpen={!!cancelOrderId} onClose={() => setCancelOrderId(null)} />
 		</section>
 	);
 }

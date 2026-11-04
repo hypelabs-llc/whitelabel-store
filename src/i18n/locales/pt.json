@@ -270,7 +270,10 @@
 		"splitFail": "Falha ao dividir a compra.",
 		"days": "{{count}}d",
 		"hours": "{{count}}h",
-		"trial": "Teste"
+		"minutes": "{{count}}m",
+		"trial": "Teste",
+		"extend": "Estender",
+		"cancel": "Cancelar"
 	},
 	"support": {
 		"heading": "Estamos aqui para ajudar",
@@ -567,5 +570,24 @@
 	"sidebar": {
 		"ctaTitle": "Precisa de mais proxies?",
 		"ctaSubtitle": "Escale em segundos — novas localizações adicionadas regularmente."
+	},
+	"extendOrderDialog": {
+		"title": "Estender pedido",
+		"subtitle": "Renove este pedido por mais um ciclo de cobrança.",
+		"billingCycle": "Ciclo de cobrança",
+		"dismiss": "Cancelar",
+		"confirm": "Estender",
+		"success": "Pedido estendido.",
+		"fail": "Não foi possível estender o pedido."
+	},
+	"cancelOrderDialog": {
+		"title": "Cancelar pedido",
+		"subtitle": "Isto impede a renovação do pedido. Por padrão, o período pago é mantido até expirar.",
+		"immediate": "Cancelar imediatamente",
+		"immediateHelp": "Encerre o pedido agora em vez de no fim do período pago.",
+		"dismiss": "Manter pedido",
+		"confirm": "Cancelar pedido",
+		"success": "Pedido cancelado.",
+		"fail": "Não foi possível cancelar o pedido."
 	}
 }
