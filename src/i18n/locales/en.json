@@ -196,7 +196,12 @@
 		"dismiss": "Dismiss",
 		"send": "Send Report",
 		"success": "Incident reported. Our team will look into it shortly.",
-		"fail": "Failed to report the incident."
+		"fail": "Failed to report the incident.",
+		"suggestions": {
+			"down": "Proxy down",
+			"slow": "Proxy slow",
+			"authFails": "Authentication fails"
+		}
 	},
 	"orderDialog": {
 		"title": "Create a New Order",

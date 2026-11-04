@@ -196,7 +196,12 @@
 		"dismiss": "Fechar",
 		"send": "Enviar relato",
 		"success": "Incidente relatado. Nossa equipe irá analisá-lo em breve.",
-		"fail": "Falha ao relatar o incidente."
+		"fail": "Falha ao relatar o incidente.",
+		"suggestions": {
+			"down": "Proxy fora do ar",
+			"slow": "Proxy lento",
+			"authFails": "Falha de autenticação"
+		}
 	},
 	"orderDialog": {
 		"title": "Criar um novo pedido",

@@ -10,7 +10,10 @@ import { shortId } from "@/lib";
 import { useTranslation } from "react-i18next";
 
 /** Minimal shape of the proxies the incident form lists (the SDK no longer ships this reseller-store type). */
-type Proxy = { id: string; hostname?: string | null; port?: number | null };
+type Proxy = { id: string; host?: string | null; port?: number | null };
+
+// Quick-fill suggestions for the subject field (keys under reportDialog.suggestions.*).
+const SUBJECT_SUGGESTIONS = ["down", "slow", "authFails"] as const;
 
 export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isOpen: boolean; proxyId?: string; onClose: () => void }) {
 	const { t } = useTranslation();
@@ -51,7 +54,7 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 							<option value={""} disabled>{t("reportDialog.selectProxy")}</option>
 							{(proxies ?? []).map((proxy) => (
 								<option key={proxy.id} value={proxy.id}>
-									#{shortId(proxy.id)} — {proxy.hostname}:{proxy.port}
+									#{shortId(proxy.id)} — {proxy.host}:{proxy.port}
 								</option>
 							))}
 						</select>
@@ -59,6 +62,26 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 					<div className={"space-y-1.5"}>
 						<label className={"text-sm font-medium text-fg-strong required"}>{t("reportDialog.subject")}</label>
 						<TextInput value={subject} onValueChange={setSubject} placeholder={t("reportDialog.subjectPlaceholder")} required />
+						<div className={"flex flex-wrap gap-2 pt-1"}>
+							{SUBJECT_SUGGESTIONS.map((key) => {
+								const label = t(`reportDialog.suggestions.${key}`);
+								const active = subject === label;
+								return (
+									<button
+										key={key}
+										type={"button"}
+										onClick={() => setSubject(label)}
+										aria-pressed={active}
+										className={
+											"rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
+											(active ? "border-brand bg-brand-soft text-brand" : "border-line bg-surface text-muted hover:bg-surface-muted hover:text-fg")
+										}
+									>
+										{label}
+									</button>
+								);
+							})}
+						</div>
 					</div>
 					<div className={"space-y-1.5"}>
 						<label className={"text-sm font-medium text-fg-strong required"}>{t("reportDialog.message")}</label>

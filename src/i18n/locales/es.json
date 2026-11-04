@@ -196,7 +196,12 @@
 		"dismiss": "Descartar",
 		"send": "Enviar reporte",
 		"success": "Incidencia reportada. Nuestro equipo la revisará en breve.",
-		"fail": "No se pudo reportar la incidencia."
+		"fail": "No se pudo reportar la incidencia.",
+		"suggestions": {
+			"down": "Proxy caído",
+			"slow": "Proxy lento",
+			"authFails": "Fallo de autenticación"
+		}
 	},
 	"orderDialog": {
 		"title": "Crear un nuevo pedido",

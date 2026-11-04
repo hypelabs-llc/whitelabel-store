@@ -192,7 +192,12 @@
 		"dismiss": "取消",
 		"send": "提交",
 		"success": "故障已提交，我们会尽快处理。",
-		"fail": "提交故障报告失败。"
+		"fail": "提交故障报告失败。",
+		"suggestions": {
+			"down": "代理离线",
+			"slow": "代理缓慢",
+			"authFails": "认证失败"
+		}
 	},
 	"orderDialog": {
 		"title": "创建新订单",

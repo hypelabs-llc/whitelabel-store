@@ -11,7 +11,7 @@ import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 
 /** Minimal order shape the extend flow needs (the SDK no longer ships this reseller-store type). */
-type ExtendProxy = { id: string; countryCode?: string | null; isp?: string | null; hostname?: string | null; port?: number | null };
+type ExtendProxy = { id: string; countryCode?: string | null; isp?: string | null; host?: string | null; port?: number | null };
 type Order = { id: string; expiresAt?: string | null; status?: string; location?: string; isp?: string; proxies?: ExtendProxy[] };
 
 export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -91,7 +91,7 @@ export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boole
 										{proxy.isp && <img src={ispIconUrl(proxy.isp)} className={"absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border border-surface"} alt={proxy.isp} />}
 									</div>
 									<p className={"text-sm text-fg"}>
-										#{shortId(proxy.id)} — {proxy.hostname}:{proxy.port}
+										#{shortId(proxy.id)} — {proxy.host}:{proxy.port}
 									</p>
 								</div>
 							))}
