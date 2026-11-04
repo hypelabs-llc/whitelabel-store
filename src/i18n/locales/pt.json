@@ -25,6 +25,10 @@
 		"openUserMenu": "Abrir menu do usuário"
 	},
 	"auth": {
+		"continueWithGoogle": "Continuar com o Google",
+		"continueWithGithub": "Continuar com o GitHub",
+		"socialSoon": "O login com redes sociais chegará em breve.",
+		"or": "ou",
 		"signInTitle": "Entre na sua conta",
 		"haveAccount": "Já tem uma conta?",
 		"signInHere": "Entre aqui.",

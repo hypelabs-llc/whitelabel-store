@@ -25,6 +25,10 @@
 		"openUserMenu": "打开用户菜单"
 	},
 	"auth": {
+		"continueWithGoogle": "使用 Google 继续",
+		"continueWithGithub": "使用 GitHub 继续",
+		"socialSoon": "社交账号登录即将推出。",
+		"or": "或",
 		"signInTitle": "登录您的账户",
 		"haveAccount": "已有账户?",
 		"signInHere": "点此登录。",

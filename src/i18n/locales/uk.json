@@ -25,6 +25,10 @@
 		"openUserMenu": "Відкрити меню користувача"
 	},
 	"auth": {
+		"continueWithGoogle": "Продовжити з Google",
+		"continueWithGithub": "Продовжити з GitHub",
+		"socialSoon": "Вхід через соцмережі незабаром.",
+		"or": "або",
 		"signInTitle": "Увійдіть до свого облікового запису",
 		"haveAccount": "Вже маєте обліковий запис?",
 		"signInHere": "Увійдіть тут.",
