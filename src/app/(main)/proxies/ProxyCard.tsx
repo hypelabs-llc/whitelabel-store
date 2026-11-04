@@ -112,7 +112,7 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 					<div className={"flex items-center gap-1.5 overflow-hidden rounded-md border border-line bg-surface-muted px-3 pr-1.5"}>
 						<Globe className={"h-4 w-4 shrink-0 text-muted"} />
 						<input
-							className={"min-w-0 flex-1 truncate border-0 bg-transparent py-2.5 font-mono text-sm text-fg ring-0 focus:border-0 focus:ring-0"}
+							className={"min-w-0 flex-1 truncate border-0 bg-transparent py-2.5 font-mono text-sm text-fg outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0"}
 							value={rotationLink || "https://••••••••••••••••••••••••••••"}
 							readOnly
 							aria-hidden={!rotationLink}
