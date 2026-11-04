@@ -6,14 +6,8 @@ import { Dices, KeyRound, Target } from "lucide-react";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { getClientIp, getProxyCredentials, updateProxyCredentials } from "@/lib/actions/proxy";
+import { isIpv4 } from "@/lib";
 import { useTranslation } from "react-i18next";
-
-// Plain IPv4 only (no CIDR, no IPv6): four 0-255 octets.
-function isIpv4(value: string): boolean {
-	const parts = value.split(".");
-	if (parts.length !== 4) return false;
-	return parts.every((part) => /^\d{1,3}$/.test(part) && Number(part) <= 255);
-}
 
 export default function ChangeCredentialsDialog({ proxyId, username, password, isOpen, onClose }: { proxyId: string; username: string; password: string; isOpen: boolean; onClose: () => void }) {
 	const { t } = useTranslation();

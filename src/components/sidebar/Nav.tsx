@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { BookOpen, LayoutDashboard, LifeBuoy, Package, Server, Star, type LucideIcon } from "lucide-react";
 import clsx from "clsx";
 import { useConfiguration } from "@/contexts/configuration";
+import { isActive } from "@/lib";
 
 type NavItem = {
 	/** i18n key for the label. */
@@ -38,10 +39,6 @@ const GROUPS: NavGroup[] = [
 		],
 	},
 ];
-
-function isActive(href: string, pathname: string): boolean {
-	return href === "/" ? pathname === "/" : pathname.startsWith(href);
-}
 
 export default function Nav({ onNavigate }: { onNavigate?: () => void }) {
 	const { t } = useTranslation();

@@ -3,36 +3,13 @@ import { useState } from "react";
 import { Badge, Button, EmptyState, Heading } from "@/components/ui";
 import { History, Package, ShoppingCart, Sparkles, XCircle } from "lucide-react";
 import useSWR from "swr";
-import { format, differenceInDays, differenceInHours, differenceInMinutes, isValid } from "date-fns";
-import { CopyableId } from "@/lib";
+import { differenceInDays } from "date-fns";
+import { CopyableId, formatDate, resourceCount, timeLeft } from "@/lib";
 import Link from "next/link";
 import type { Order, Plain } from "@hypelabs-llc/ts-sdk";
 import ExtendOrderDialog from "./ExtendOrderDialog";
 import CancelOrderDialog from "./CancelOrderDialog";
 import { useTranslation } from "react-i18next";
-
-// Count of delivered resources (proxies) across an order's line items.
-function resourceCount(order: Plain<Order>): number {
-	return (order.items ?? []).reduce((total, item) => total + (item.resourceIds?.length ?? 0), 0);
-}
-
-// Time remaining as the finest useful unit: days when >= 1 day, else hours when >= 1 hour, else minutes
-// (so an order expiring in under an hour shows "45m" rather than "0h"). Clamped at zero.
-function timeLeft(expiresAt: Date): { value: number; unit: "days" | "hours" | "minutes" } {
-	const now = new Date();
-	const days = differenceInDays(expiresAt, now);
-	if (days >= 1) return { value: days, unit: "days" };
-	const hours = differenceInHours(expiresAt, now);
-	if (hours >= 1) return { value: hours, unit: "hours" };
-	return { value: Math.max(0, differenceInMinutes(expiresAt, now)), unit: "minutes" };
-}
-
-// Safe date format: the SDK dates can be null/invalid, so render a dash rather than crash.
-function formatDate(value: unknown): string {
-	if (!value) return "-";
-	const date = new Date(value as string);
-	return isValid(date) ? format(date, "MMM dd, yyyy") : "-";
-}
 
 export default function OrdersList() {
 	const { t } = useTranslation();
