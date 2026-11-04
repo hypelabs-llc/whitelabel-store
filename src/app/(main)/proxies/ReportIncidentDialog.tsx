@@ -1,12 +1,12 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import { Button, Modal, Textarea, TextInput } from "@/components/ui";
 import { Send } from "lucide-react";
-import axios from "axios";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { shortId } from "@/lib";
+import { report } from "@/lib/actions/incident";
 import { useTranslation } from "react-i18next";
 
 /** Minimal shape of the proxies the incident form lists (the SDK no longer ships this reseller-store type). */
@@ -27,14 +27,24 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 		if (isOpen) setSelectedProxyId(proxyId);
 	}, [isOpen, proxyId]);
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		if (!selectedProxyId) return;
+		// The incident target is the proxy's endpoint (host:port), not its id.
+		const selected = (proxies ?? []).find((proxy) => proxy.id === selectedProxyId);
+		const target = selected?.host ? `${selected.host}:${selected.port ?? ""}` : selectedProxyId;
 		setLoading(true);
-		axios.post("/api/proxies/report-incident", { proxyId: selectedProxyId, subject, message })
-			.then(() => { toast.success(t("reportDialog.success")); setSubject(""); setMessage(""); onClose(); })
-			.catch(() => toast.error(t("reportDialog.fail")))
-			.finally(() => setLoading(false));
+		try {
+			await report({ target, subject, description: message });
+			toast.success(t("reportDialog.success"));
+			setSubject("");
+			setMessage("");
+			onClose();
+		} catch {
+			toast.error(t("reportDialog.fail"));
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -84,8 +94,8 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 						</div>
 					</div>
 					<div className={"space-y-1.5"}>
-						<label className={"text-sm font-medium text-fg-strong required"}>{t("reportDialog.message")}</label>
-						<Textarea value={message} onValueChange={setMessage} placeholder={t("reportDialog.messagePlaceholder")} rows={4} required />
+						<label className={"text-sm font-medium text-fg-strong"}>{t("reportDialog.message")}</label>
+						<Textarea value={message} onValueChange={setMessage} placeholder={t("reportDialog.messagePlaceholder")} rows={4} />
 					</div>
 				</div>
 
