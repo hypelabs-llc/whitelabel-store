@@ -11,7 +11,8 @@ import { useTranslation } from "react-i18next";
 // Reflects the last ping result so the button border turns green (reachable) or red (down).
 type PingStatus = "idle" | "up" | "down";
 
-export function CheckProxyButton({ id, onDown }: { id: string; onDown?: () => void }) {
+// `widthClass` lets callers control width: the card passes "flex-1" (full width); the table row omits it.
+export function CheckProxyButton({ id, onDown, widthClass = "flex-1", size }: { id: string; onDown?: () => void; widthClass?: string; size?: "xs" | "sm" | "md" | "lg" }) {
 	const { t } = useTranslation();
 	const [loading, setLoading] = useState(false);
 	const [status, setStatus] = useState<PingStatus>("idle");
@@ -47,8 +48,10 @@ export function CheckProxyButton({ id, onDown }: { id: string; onDown?: () => vo
 		<Button
 			icon={Activity}
 			variant={"secondary"}
+			size={size}
 			className={clsx(
-				"flex-1 transition-colors",
+				widthClass,
+				"transition-colors",
 				status === "up" && "!border-green-500 !text-green-600 dark:!text-green-400",
 				status === "down" && "!border-red-500 !text-red-600 dark:!text-red-400",
 			)}

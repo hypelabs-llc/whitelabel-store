@@ -110,6 +110,7 @@
 		"password": "Пароль",
 		"ipRotationLink": "Ссылка для смены IP:",
 		"generateRotationLink": "Создать ссылку ротации",
+		"copyRotationLink": "Копировать ссылку ротации",
 		"rotationLinkFail": "Не удалось создать ссылку ротации.",
 		"copied": "Скопировано в буфер обмена!",
 		"daysLeft": "{{count}} дн. осталось",
@@ -127,7 +128,14 @@
 		"rotateSuccess": "IP успешно сменён.",
 		"rotateFail": "Не удалось сменить IP прокси.",
 		"commentSaved": "Комментарий сохранён.",
-		"commentFail": "Не удалось сохранить комментарий."
+		"commentFail": "Не удалось сохранить комментарий.",
+		"viewGrid": "Вид сеткой",
+		"viewList": "Вид списком",
+		"colProxy": "Прокси",
+		"colPing": "Пинг",
+		"colEndpoint": "Адрес",
+		"colAuth": "Аутентификация",
+		"colRotation": "Ротация IP"
 	},
 	"extendDialog": {
 		"title": "Продление заказа",

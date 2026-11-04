@@ -7,7 +7,8 @@ import { triggerIpRotation } from "@/lib/actions/proxy";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-export default function RotateIpButton({ id }: { id: string }) {
+// `className` lets callers control width: the card passes "flex-1" (full width); the table row omits it.
+export default function RotateIpButton({ id, className = "flex-1", size }: { id: string; className?: string; size?: "xs" | "sm" | "md" | "lg" }) {
 	const { t } = useTranslation();
 	const [loading, setLoading] = useState<boolean>(false);
 	const handleClick = async () => {
@@ -23,7 +24,7 @@ export default function RotateIpButton({ id }: { id: string }) {
 	};
 
 	return (
-		<Button onClick={handleClick} loading={loading} icon={RotateCw} variant={"secondary"} className={"flex-1"}>
+		<Button onClick={handleClick} loading={loading} icon={RotateCw} variant={"secondary"} size={size} className={className}>
 			{t("proxies.rotateIp")}
 		</Button>
 	);

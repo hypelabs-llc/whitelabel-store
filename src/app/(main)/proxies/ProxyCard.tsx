@@ -102,15 +102,6 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 				<CopyRow label={t("proxies.proxyHost")} value={proxy.host} />
 				<CopyRow label={t("proxies.proxyIp")} value={proxy.ip} />
 				<CopyRow label={t("proxies.port")} value={proxy.port?.toString()} info={t("proxies.portTooltip")} />
-				{rotationMinutes != null && (
-					<div className={"flex items-center justify-between gap-3 py-2.5"}>
-						<span className={"shrink-0 whitespace-nowrap font-medium text-fg-strong"}>{t("proxies.autoRotation")}</span>
-						<span className={"flex items-center gap-1.5 text-fg"}>
-							<Timer className={"h-4 w-4 shrink-0 text-muted"} />
-							{t("proxies.autoRotationEvery", { count: rotationMinutes })}
-						</span>
-					</div>
-				)}
 			</div>
 
 			<div className={"space-y-1.5"}>
@@ -155,7 +146,7 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 				<CheckProxyButton id={proxyId} onDown={() => onReportIncident?.(proxyId)} />
 				<RotateIpButton id={proxyId} />
 				<Button onClick={() => setRotationOpen(true)} icon={Timer} variant={"secondary"} className={"flex-1"}>
-					{t("proxies.autoRotation")}
+					{rotationMinutes != null ? t("proxies.autoRotationEvery", { count: rotationMinutes }) : t("proxies.autoRotation")}
 				</Button>
 				<Button onClick={() => setCredentialsOpen(true)} icon={KeyRound} variant={"secondary"} className={"flex-1"}>
 					{t("proxies.credentials")}

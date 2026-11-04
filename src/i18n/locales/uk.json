@@ -110,6 +110,7 @@
 		"password": "Пароль",
 		"ipRotationLink": "Посилання для ротації IP:",
 		"generateRotationLink": "Згенерувати посилання ротації",
+		"copyRotationLink": "Копіювати посилання ротації",
 		"rotationLinkFail": "Не вдалося згенерувати посилання ротації.",
 		"copied": "Скопійовано в буфер обміну!",
 		"daysLeft": "залишилось {{count}} дн",
@@ -127,7 +128,14 @@
 		"rotateSuccess": "IP успішно змінено.",
 		"rotateFail": "Не вдалося змінити IP проксі.",
 		"commentSaved": "Коментар успішно збережено.",
-		"commentFail": "Не вдалося зберегти коментар."
+		"commentFail": "Не вдалося зберегти коментар.",
+		"viewGrid": "Вигляд сіткою",
+		"viewList": "Вигляд списком",
+		"colProxy": "Проксі",
+		"colPing": "Пінг",
+		"colEndpoint": "Адреса",
+		"colAuth": "Автентифікація",
+		"colRotation": "Ротація IP"
 	},
 	"extendDialog": {
 		"title": "Продовжити покупку",

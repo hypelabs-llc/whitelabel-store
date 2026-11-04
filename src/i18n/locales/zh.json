@@ -102,6 +102,7 @@
 		"password": "密码",
 		"ipRotationLink": "IP 轮换链接:",
 		"generateRotationLink": "生成轮换链接",
+		"copyRotationLink": "复制轮换链接",
 		"rotationLinkFail": "无法生成轮换链接。",
 		"copied": "已复制到剪贴板!",
 		"daysLeft": "剩余 {{count}} 天",
@@ -119,7 +120,14 @@
 		"rotateSuccess": "IP 轮换成功。",
 		"rotateFail": "代理 IP 轮换失败。",
 		"commentSaved": "备注已保存。",
-		"commentFail": "保存备注失败。"
+		"commentFail": "保存备注失败。",
+		"viewGrid": "网格视图",
+		"viewList": "列表视图",
+		"colProxy": "代理",
+		"colPing": "测速",
+		"colEndpoint": "端点",
+		"colAuth": "认证",
+		"colRotation": "IP 轮换"
 	},
 	"extendDialog": {
 		"title": "续期订单",
