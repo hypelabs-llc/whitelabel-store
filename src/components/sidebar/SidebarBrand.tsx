@@ -23,10 +23,10 @@ export default function SidebarBrand({ className, imgClassName }: { className?: 
 	const storeName = configuration?.storeName;
 
 	return (
-		<Link href="/" className={clsx("flex items-center gap-2 px-2", className)} aria-label={storeName ?? "Home"}>
+		<Link href="/" className={clsx("flex items-center gap-2 px-2 mb-2", className)} aria-label={storeName ?? "Home"}>
 			{logoUrl ? (
 				// eslint-disable-next-line @next/next/no-img-element
-				<img alt={storeName ?? "Logo"} src={mounted && resolvedTheme === "dark" ? logoDarkUrl : logoUrl} className={clsx("w-auto max-w-full object-contain", imgClassName ?? "h-8 max-w-[90%]")} />
+				<img alt={storeName ?? "Logo"} src={mounted && resolvedTheme === "dark" ? logoDarkUrl : logoUrl} className={clsx("w-auto object-contain", imgClassName ?? "h-8 max-w-[80%]")} />
 			) : (
 				<span className="text-lg font-bold text-fg-strong">{storeName}</span>
 			)}

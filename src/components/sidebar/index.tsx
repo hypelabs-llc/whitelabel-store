@@ -10,9 +10,7 @@ import UserMenu from "./UserMenu";
 export default function Sidebar() {
 	return (
 		<aside className="hidden h-full w-[260px] shrink-0 flex-col gap-4 border-r border-line bg-surface px-4 py-5 md:flex">
-			<div className="pt-1">
-				<SidebarBrand />
-			</div>
+			<SidebarBrand />
 			<div className="flex-1 overflow-y-auto">
 				<Nav />
 			</div>
