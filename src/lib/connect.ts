@@ -1,5 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { createConnectClient, toPlain } from "@hypelabs-llc/ts-sdk";
 import { FALLBACK_CONFIGURATION } from "@/contexts/configuration/configuration";
 import { maskImageUrl } from "@/lib/imageProxy";
@@ -22,7 +23,7 @@ export function getConnect(): ReturnType<typeof createConnectClient> {
 
 // Loads the tenant's white-label configuration from Connect: branding from `organizations.branding`,
 // storefront settings from `organizations.store`. Falls back to the neutral fallback config if both fail.
-export async function getConfiguration(): Promise<Configuration> {
+async function loadConfiguration(): Promise<Configuration> {
 	const client = getConnect();
 
 	const [branding, store] = await Promise.all([
@@ -41,6 +42,12 @@ export async function getConfiguration(): Promise<Configuration> {
 		store: plainStore,
 	};
 }
+
+// The Connect SDK uses its own HTTP client, so Next can't see the request to cache or revalidate it.
+// Wrap the load in a tagged data cache instead: the config is served from cache (no Connect call, so a
+// tenant's branding/store changes don't need a redeploy to render fast) until the "configuration" tag is
+// revalidated — hit GET /api/revalidate to pull the latest without rebuilding.
+export const getConfiguration = unstable_cache(loadConfiguration, ["store-configuration"], { tags: ["configuration"] });
 
 // White-label: rewrite the branding image URLs to our opaque /api/image proxy so the client never sees
 // the upstream vendor's domain. Non-URL / relative values pass through unchanged.
