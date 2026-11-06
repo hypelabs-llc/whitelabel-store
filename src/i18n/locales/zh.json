@@ -127,6 +127,9 @@
 		"colEndpoint": "端点",
 		"colAuth": "认证",
 		"colRotation": "IP 轮换",
+		"expiresIn": "{{time}}后到期",
+		"fromOrder": "来自",
+		"timeLeft": "剩余 {{time}}",
 		"proxyOptions": "代理选项"
 	},
 	"extendDialog": {

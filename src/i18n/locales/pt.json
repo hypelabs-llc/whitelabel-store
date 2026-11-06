@@ -20,7 +20,6 @@
 		"orderNow": "Pedir agora",
 		"signOut": "Sair",
 		"myOrders": "Meus pedidos",
-		"adminDashboard": "Painel de administração",
 		"openMainMenu": "Abrir menu principal",
 		"openUserMenu": "Abrir menu do usuário"
 	},
@@ -132,6 +131,9 @@
 		"colEndpoint": "Endpoint",
 		"colAuth": "Autenticação",
 		"colRotation": "Rotação de IP",
+		"expiresIn": "Expira em {{time}}",
+		"fromOrder": "de",
+		"timeLeft": "{{time}} restantes",
 		"proxyOptions": "Opções do proxy"
 	},
 	"extendDialog": {

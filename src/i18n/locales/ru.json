@@ -135,6 +135,9 @@
 		"colEndpoint": "Адрес",
 		"colAuth": "Аутентификация",
 		"colRotation": "Ротация IP",
+		"expiresIn": "Истекает через {{time}}",
+		"fromOrder": "из",
+		"timeLeft": "осталось {{time}}",
 		"proxyOptions": "Настройки прокси"
 	},
 	"extendDialog": {

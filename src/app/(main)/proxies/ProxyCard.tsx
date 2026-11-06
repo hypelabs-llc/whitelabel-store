@@ -5,11 +5,11 @@ import { ClipboardList, Copy, Globe, Info, KeyRound, Loader2, Pencil, Sparkles, 
 import UpdateCommentDialog from "./UpdateCommentDialog";
 import { Badge, Button, Card, Tooltip } from "@/components/ui";
 import { CheckProxyButton } from "./CheckProxyButton";
-import { CopyableId, ispIconUrl } from "@/lib";
+import { CopyableId, ispIconUrl, timeLeft } from "@/lib";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "sonner";
 import axios from "axios";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
 import { differenceInDays, differenceInHours } from "date-fns";
 import { getIpRotationLink } from "@/lib/actions/proxy";
 import RotateIpButton from "./RotateIpButton";
@@ -17,7 +17,7 @@ import ChangeCredentialsDialog from "./ChangeCredentialsDialog";
 import IpRotationDialog from "./IpRotationDialog";
 import { useTranslation } from "react-i18next";
 
-import type { Proxy, Plain } from "@hypelabs-llc/ts-sdk";
+import type { Order, Proxy, Plain } from "@hypelabs-llc/ts-sdk";
 
 function CopyRow({ label, value, info }: { label: string; value?: string | null; info?: string }) {
 	const { t } = useTranslation();
@@ -44,6 +44,17 @@ function CopyRow({ label, value, info }: { label: string; value?: string | null;
 export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Proxy>; onReportIncident?: (proxyId: string) => void }) {
 	const { t } = useTranslation();
 	const proxyId = proxy.id ?? "";
+
+	// Proxies don't carry their own expiry/order; find the order that delivered this proxy by matching
+	// its id against the orders' line-item resourceIds. SWR dedupes the fetch across every card.
+	// Only an order that still holds the proxy (isInactive === false) is relevant: an expired/deleted order
+	// hands its proxies back to stock, so an old one that once listed this id would otherwise show "0m left".
+	const { data: orders = [] } = useSWR<Plain<Order>[]>("/api/orders", { suspense: false });
+	const holdsProxy = (candidate: Plain<Order>) => (candidate.items ?? []).some((item) => item.resourceIds?.includes(proxyId));
+	const order = orders.find((candidate) => candidate.isInactive !== true && holdsProxy(candidate)) ?? orders.find(holdsProxy);
+	const expiry = order?.expiresAt ? timeLeft(new Date(order.expiresAt)) : null;
+	const expiryTone = expiry ? (expiry.unit !== "days" ? "danger" : expiry.value <= 3 ? "danger" : expiry.value <= 7 ? "warning" : "success") : "neutral";
+
 	const [commentOpen, setCommentOpen] = useState(false);
 	const [credentialsOpen, setCredentialsOpen] = useState(false);
 	const [rotationOpen, setRotationOpen] = useState(false);
@@ -76,7 +87,7 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 	const rotationMinutes = proxy.features?.ipRotation?.intervalMinutes;
 	return (
 		<Card className={"group space-y-5"}>
-			<div className={"flex items-start justify-between gap-3"}>
+			<div className={"flex items-center justify-between gap-3"}>
 				<div className={"flex items-center gap-4"}>
 					<div className={"relative shrink-0"}>
 						{countryCode ? (
@@ -96,6 +107,16 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 						</button>
 					</div>
 				</div>
+
+				{/* Purchase indicator: a compact one-line "time left" badge. The order id and trial flag ride
+				    along as a tooltip so the card stays uncluttered. */}
+				{order && expiry && (
+					<Tooltip content={`${order.isTrial ? `${t("orders.trial")} · ` : ""}${t("proxies.fromOrder")} #${(order.id ?? "").split("-")[0]}`}>
+						<Badge tone={expiryTone} icon={Timer}>
+							<span className={"whitespace-nowrap"}>{t("proxies.timeLeft", { time: t(`orders.${expiry.unit}`, { count: expiry.value }) })}</span>
+						</Badge>
+					</Tooltip>
+				)}
 			</div>
 
 			<div className={"divide-y divide-line border-y border-line text-sm"}>

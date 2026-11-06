@@ -131,6 +131,9 @@
 		"colEndpoint": "Endpoint",
 		"colAuth": "Autenticación",
 		"colRotation": "Rotación de IP",
+		"expiresIn": "Caduca en {{time}}",
+		"fromOrder": "de",
+		"timeLeft": "{{time}} restantes",
 		"proxyOptions": "Opciones del proxy"
 	},
 	"extendDialog": {
