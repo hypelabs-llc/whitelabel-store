@@ -9,7 +9,7 @@
 import { headers } from "next/headers";
 import { getConnect } from "@/lib/connect";
 import { toPlain } from "@hypelabs-llc/ts-sdk";
-import type { ProxyPingResponse, ProxyCredentialResponse, UpdateProxyCredentialsRequest, IpRotationLinkResponse, Plain } from "@hypelabs-llc/ts-sdk";
+import type { ProxyPingResponse, ProxyCredentialResponse, UpdateProxyCredentialsRequest, IpRotationLinkResponse, ProxyOptions, UpdateProxyOptionsRequest, Plain } from "@hypelabs-llc/ts-sdk";
 
 /** Checks that a proxy is reachable through its own credentials and measures its latency. */
 export async function pingProxy(proxyId: string): Promise<Plain<ProxyPingResponse> | null> {
@@ -69,4 +69,20 @@ export async function getClientIp(): Promise<string | null> {
 export async function updateProxyComment(proxyId: string, comment: string): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
 	await getConnect().proxies.byProxyId(proxyId).annotations.patch({ note: comment ?? "" });
+}
+
+/** Reads a proxy's feature options (e.g. resolution mode), or the defaults when none are set yet. */
+export async function getProxyOptions(proxyId: string): Promise<Plain<ProxyOptions> | null> {
+	if (!proxyId) throw new Error("proxyId is required");
+	const result = await getConnect().proxies.byProxyId(proxyId).options.get();
+	return result ? toPlain(result) : null;
+}
+
+/**
+ * Sets a proxy's feature options (e.g. resolution mode). Takes the SDK request as-is: a non-default
+ * resolution mode is only accepted when the proxy exposes the capability it depends on (IPv6).
+ */
+export async function updateProxyOptions(proxyId: string, request: UpdateProxyOptionsRequest): Promise<void> {
+	if (!proxyId) throw new Error("proxyId is required");
+	await getConnect().proxies.byProxyId(proxyId).options.put(request);
 }

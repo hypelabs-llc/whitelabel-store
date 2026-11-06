@@ -130,7 +130,8 @@
 		"colPing": "Ping",
 		"colEndpoint": "Endpoint",
 		"colAuth": "Autenticación",
-		"colRotation": "Rotación de IP"
+		"colRotation": "Rotación de IP",
+		"proxyOptions": "Opciones del proxy"
 	},
 	"extendDialog": {
 		"title": "Ampliar compra",
@@ -346,5 +347,20 @@
 		"confirm": "Cancelar pedido",
 		"success": "Pedido cancelado.",
 		"fail": "No se pudo cancelar el pedido."
+	},
+	"optionsDialog": {
+		"title": "Opciones del proxy",
+		"ipv6Tab": "IPv6",
+		"resolutionMode": "Modo de resolución",
+		"resolutionHelp": "Cómo resuelve direcciones el proxy.",
+		"modeDefault": "Predeterminado - Resolver por IPv4.",
+		"modeIpv6": "IPv6 - Resolver por IPv6, con reserva a IPv4.",
+		"ipv6Unavailable": "Este proxy no expone la capacidad IPv6.",
+		"save": "Guardar cambios",
+		"dismiss": "Cerrar",
+		"success": "Opciones del proxy guardadas.",
+		"fail": "No se pudieron guardar las opciones del proxy.",
+		"noOptionsTitle": "Sin opciones disponibles",
+		"noOptionsMessage": "Este proxy no expone ninguna capacidad con opciones configurables."
 	}
 }

@@ -130,7 +130,8 @@
 		"colPing": "Ping",
 		"colEndpoint": "Endpoint",
 		"colAuth": "Authentication",
-		"colRotation": "IP Rotation"
+		"colRotation": "IP Rotation",
+		"proxyOptions": "Proxy options"
 	},
 	"extendDialog": {
 		"title": "Extend Purchase",
@@ -346,5 +347,20 @@
 		"confirm": "Cancel order",
 		"success": "Order cancelled.",
 		"fail": "Could not cancel the order."
+	},
+	"optionsDialog": {
+		"title": "Proxy Options",
+		"ipv6Tab": "IPv6",
+		"resolutionMode": "Resolution Mode",
+		"resolutionHelp": "How the proxy resolves addresses.",
+		"modeDefault": "Default - Resolve over IPv4.",
+		"modeIpv6": "IPv6 - Resolve over IPv6, falling back to IPv4.",
+		"ipv6Unavailable": "This proxy does not expose the IPv6 capability.",
+		"save": "Save Changes",
+		"dismiss": "Close",
+		"success": "Proxy options saved.",
+		"fail": "Could not save the proxy options.",
+		"noOptionsTitle": "No options available",
+		"noOptionsMessage": "This proxy doesn't expose any capability with configurable options."
 	}
 }

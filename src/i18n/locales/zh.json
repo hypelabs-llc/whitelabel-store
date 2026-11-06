@@ -126,7 +126,8 @@
 		"colPing": "测速",
 		"colEndpoint": "端点",
 		"colAuth": "认证",
-		"colRotation": "IP 轮换"
+		"colRotation": "IP 轮换",
+		"proxyOptions": "代理选项"
 	},
 	"extendDialog": {
 		"title": "续期订单",
@@ -342,5 +343,20 @@
 		"confirm": "取消订单",
 		"success": "订单已取消。",
 		"fail": "无法取消该订单。"
+	},
+	"optionsDialog": {
+		"title": "代理选项",
+		"ipv6Tab": "IPv6",
+		"resolutionMode": "解析模式",
+		"resolutionHelp": "代理如何解析地址。",
+		"modeDefault": "默认 - 通过 IPv4 解析。",
+		"modeIpv6": "IPv6 - 通过 IPv6 解析，回退到 IPv4。",
+		"ipv6Unavailable": "此代理不提供 IPv6 功能。",
+		"save": "保存更改",
+		"dismiss": "关闭",
+		"success": "代理选项已保存。",
+		"fail": "无法保存代理选项。",
+		"noOptionsTitle": "无可用选项",
+		"noOptionsMessage": "此代理未提供任何带可配置选项的功能。"
 	}
 }

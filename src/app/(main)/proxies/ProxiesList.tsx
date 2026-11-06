@@ -117,6 +117,9 @@ export default function ProxiesList() {
 									<th className="px-4 py-2.5 font-medium">{t("proxies.colEndpoint")}</th>
 									<th className="px-4 py-2.5 font-medium">{t("proxies.colAuth")}</th>
 									<th className="px-4 py-2.5 font-medium">{t("proxies.colRotation")}</th>
+									<th className="px-4 py-2.5 text-right font-medium">
+										<span className="sr-only">{t("proxies.proxyOptions")}</span>
+									</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-line">

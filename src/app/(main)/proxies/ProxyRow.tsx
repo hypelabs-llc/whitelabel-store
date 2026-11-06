@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, KeyRound, Link2, Loader2, Pencil, Timer } from "lucide-react";
+import { Globe, KeyRound, Link2, Loader2, MoreHorizontal, Pencil, Settings2, Timer } from "lucide-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import UpdateCommentDialog from "./UpdateCommentDialog";
 import { Button } from "@/components/ui";
 import { CheckProxyButton } from "./CheckProxyButton";
@@ -13,6 +14,7 @@ import { getIpRotationLink } from "@/lib/actions/proxy";
 import RotateIpButton from "./RotateIpButton";
 import ChangeCredentialsDialog from "./ChangeCredentialsDialog";
 import IpRotationDialog from "./IpRotationDialog";
+import ProxyOptionsDialog from "./ProxyOptionsDialog";
 import { useTranslation } from "react-i18next";
 
 import type { Proxy, Plain } from "@hypelabs-llc/ts-sdk";
@@ -23,6 +25,7 @@ export default function ProxyRow({ proxy, onReportIncident }: { proxy: Plain<Pro
 	const [commentOpen, setCommentOpen] = useState(false);
 	const [credentialsOpen, setCredentialsOpen] = useState(false);
 	const [rotationOpen, setRotationOpen] = useState(false);
+	const [optionsOpen, setOptionsOpen] = useState(false);
 	const [rotationLink, setRotationLink] = useState("");
 	const [generatingLink, setGeneratingLink] = useState(false);
 
@@ -58,6 +61,7 @@ export default function ProxyRow({ proxy, onReportIncident }: { proxy: Plain<Pro
 	const ispName = proxy.isp?.name;
 	const ispLogo = proxy.isp?.logoUrl ?? (proxy.isp?.id ? ispIconUrl(proxy.isp.id) : undefined);
 	const rotationMinutes = proxy.features?.ipRotation?.intervalMinutes;
+	const hasIpv6 = (proxy.capabilities ?? []).includes("Ipv6");
 	const endpoint = proxy.host && proxy.port ? `${proxy.host}:${proxy.port}` : proxy.host;
 
 	return (
@@ -135,11 +139,39 @@ export default function ProxyRow({ proxy, onReportIncident }: { proxy: Plain<Pro
 						{generatingLink ? <Loader2 className={"h-4 w-4 animate-spin"} /> : <Link2 className={"h-4 w-4"} />}
 					</button>
 				</div>
+			</td>
+
+			{/* Per-proxy options: the "..." overflow menu, its own column (not an IP-rotation action). */}
+			<td className={"px-4 py-3 text-right"}>
+				<Menu as={"div"} className={"relative inline-block shrink-0 text-left"}>
+					<MenuButton
+						aria-label={t("proxies.proxyOptions")}
+						className={"flex h-8 w-8 items-center justify-center rounded-md border border-line bg-surface text-muted transition-colors hover:bg-surface-muted hover:text-fg data-[open]:bg-surface-muted data-[open]:text-fg"}
+					>
+						<MoreHorizontal className={"h-4 w-4"} />
+					</MenuButton>
+					<MenuItems
+						anchor={"bottom end"}
+						className={"z-50 mt-2 w-48 origin-top-right rounded-lg border border-line bg-surface-elevated py-1 shadow-lg focus:outline-none"}
+					>
+						<MenuItem>
+							<button
+								type={"button"}
+								onClick={() => setOptionsOpen(true)}
+								className={"flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-fg data-[focus]:bg-surface-muted data-[focus]:outline-none"}
+							>
+								<Settings2 className={"h-4 w-4 shrink-0 text-muted"} />
+								{t("proxies.proxyOptions")}
+							</button>
+						</MenuItem>
+					</MenuItems>
+				</Menu>
 
 				{/* Dialogs render through a portal, so they're valid inside a cell. */}
 				<UpdateCommentDialog isOpen={commentOpen} initialComment={proxy.note ?? ""} onClose={() => setCommentOpen(false)} onSubmit={handleUpdateComment} />
 				<ChangeCredentialsDialog proxyId={proxyId} username={""} password={""} isOpen={credentialsOpen} onClose={() => setCredentialsOpen(false)} />
 				<IpRotationDialog proxyId={proxyId} interval={rotationMinutes} isOpen={rotationOpen} onClose={() => setRotationOpen(false)} />
+				<ProxyOptionsDialog proxyId={proxyId} hasIpv6={hasIpv6} isOpen={optionsOpen} onClose={() => setOptionsOpen(false)} />
 			</td>
 		</tr>
 	);
