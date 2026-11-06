@@ -12,8 +12,8 @@ importers:
         specifier: ^2.2.10
         version: 2.2.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@hypelabs-llc/ts-sdk':
-        specifier: ^0.2.4
-        version: 0.2.4(supports-color@7.2.0)
+        specifier: ^0.2.5
+        version: 0.2.5(supports-color@7.2.0)
       '@tremor/react':
         specifier: ^3.18.7
         version: 3.18.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -359,8 +359,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@hypelabs-llc/ts-sdk@0.2.4':
-    resolution: {integrity: sha512-93B08/C1iFmrWh7mlNU4MNhgEy2agpyCXt7hId1ScAK/tLwFxRAbkKKBRYGYHJbk5Dtu8Bws7zUmIisqDZtPAg==}
+  '@hypelabs-llc/ts-sdk@0.2.5':
+    resolution: {integrity: sha512-QOgrQ2EYYYCXLb55WDH28uz/G7KazN3LeawclumtbJU0hvC28lw7sbogK3mmHX1b8wzRdmr5bKp02DfyCFufAA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -3572,7 +3572,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@hypelabs-llc/ts-sdk@0.2.4(supports-color@7.2.0)':
+  '@hypelabs-llc/ts-sdk@0.2.5(supports-color@7.2.0)':
     dependencies:
       '@microsoft/kiota-authentication-azure': 1.0.0-preview.106(supports-color@7.2.0)
       '@microsoft/kiota-bundle': 1.0.0-preview.106
