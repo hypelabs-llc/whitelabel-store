@@ -118,7 +118,7 @@
 		"reachable": "Проксі активний",
 		"unreachable": "Проксі недоступний",
 		"rotateIp": "Змінити IP",
-		"autoRotation": "Автоматична ротація",
+		"autoRotation": "Ротація IP",
 		"autoRotationEvery": "Кожні {{count}} хв",
 		"credentials": "Облік. дані",
 		"pingSuccess": "Проксі успішно перевірено.",

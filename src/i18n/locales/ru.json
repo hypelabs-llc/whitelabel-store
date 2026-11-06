@@ -118,7 +118,7 @@
 		"reachable": "Прокси активен",
 		"unreachable": "Прокси недоступен",
 		"rotateIp": "Сменить IP",
-		"autoRotation": "Авторотация",
+		"autoRotation": "Ротация IP",
 		"autoRotationEvery": "Каждые {{count}} мин",
 		"credentials": "Данные",
 		"pingSuccess": "Прокси успешно пропингован.",

@@ -127,7 +127,7 @@ export default function ProxyRow({ proxy, onReportIncident }: { proxy: Plain<Pro
 					<Button onClick={() => setRotationOpen(true)} icon={Timer} variant={"secondary"} size={"sm"}>
 						{rotationMinutes != null ? t("proxies.autoRotationEvery", { count: rotationMinutes }) : t("proxies.autoRotation")}
 					</Button>
-					<RotateIpButton id={proxyId} className={""} size={"sm"} />
+					<RotateIpButton id={proxyId} iconOnly />
 					<button
 						type={"button"}
 						onClick={copyLink}

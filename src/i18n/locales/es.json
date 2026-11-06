@@ -114,7 +114,7 @@
 		"reachable": "Proxy activo",
 		"unreachable": "Proxy caído",
 		"rotateIp": "Rotar IP",
-		"autoRotation": "Rotación automática",
+		"autoRotation": "Rotación de IP",
 		"autoRotationEvery": "Cada {{count}} min",
 		"credentials": "Credenciales",
 		"pingSuccess": "Proxy comprobado correctamente.",

@@ -110,7 +110,7 @@
 		"reachable": "代理在线",
 		"unreachable": "代理离线",
 		"rotateIp": "轮换 IP",
-		"autoRotation": "自动轮换",
+		"autoRotation": "IP 轮换",
 		"autoRotationEvery": "每 {{count}} 分钟",
 		"credentials": "凭据",
 		"pingSuccess": "代理测速成功。",
