@@ -108,7 +108,7 @@ export default function ProxiesList() {
 			    layout can't fit); grid mode is always the card grid. */}
 			{view === "list" ? (
 				<>
-					<div className="hidden overflow-hidden rounded-xl border border-line sm:block">
+					<div className="hidden overflow-hidden rounded-xl border border-line bg-surface sm:block">
 						<table className="w-full border-collapse text-sm">
 							<thead>
 								<tr className="border-b border-line bg-surface-muted text-left text-xs font-medium uppercase tracking-wider text-muted">

@@ -54,7 +54,7 @@ export default function OrdersList() {
 			<Heading icon={Package} title={t("orders.title")} subtitle={t("orders.subtitle")} />
 
 			{hasOrders && (
-				<div className={"overflow-hidden rounded-xl border border-line"}>
+				<div className={"overflow-hidden rounded-xl border border-line bg-surface"}>
 					<div className={"overflow-x-auto"}>
 						<table className={"w-full border-collapse text-sm"}>
 							<thead>
