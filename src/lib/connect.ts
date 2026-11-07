@@ -48,7 +48,11 @@ export async function getCustomerConnect(): Promise<ReturnType<typeof createCust
 
 // Loads the tenant's white-label configuration from Connect: branding from `organizations.branding`,
 // storefront settings from `organizations.store`. Falls back to the neutral fallback config if both fail.
-async function loadConfiguration(): Promise<Configuration> {
+//
+// `raw` controls the branding image URLs: masked through /api/image by default (safe for the client), or
+// the direct upstream URLs when `raw` is true — ONLY for server-side rendering that fetches the image
+// itself and never hands the URL to the browser (e.g. app/icon.tsx). Never pass a raw config to a client.
+async function loadConfiguration(raw = false): Promise<Configuration> {
 	const client = getConnect();
 
 	const [branding, store] = await Promise.all([
@@ -59,11 +63,12 @@ async function loadConfiguration(): Promise<Configuration> {
 	if (!branding && !store) return FALLBACK_CONFIGURATION;
 
 	const plainStore = store ? toPlain(store) : FALLBACK_CONFIGURATION.store;
+	const plainBranding = branding ? toPlain(branding) : null;
 
 	return {
 		// storeName comes from the store (store.name); fall back to the neutral default.
 		storeName: plainStore.name ?? FALLBACK_CONFIGURATION.storeName,
-		branding: branding ? maskBrandingImages(toPlain(branding)) : FALLBACK_CONFIGURATION.branding,
+		branding: plainBranding ? (raw ? plainBranding : maskBrandingImages(plainBranding)) : FALLBACK_CONFIGURATION.branding,
 		store: plainStore,
 	};
 }
@@ -71,7 +76,8 @@ async function loadConfiguration(): Promise<Configuration> {
 // The Connect SDK uses its own HTTP client, so Next can't see the request to cache or revalidate it.
 // Wrap the load in a tagged data cache instead: the config is served from cache (no Connect call, so a
 // tenant's branding/store changes don't need a redeploy to render fast) until the "configuration" tag is
-// revalidated — hit GET /api/revalidate to pull the latest without rebuilding.
+// revalidated — hit GET /api/revalidate to pull the latest without rebuilding. The `raw` argument is part
+// of the cache key, so masked and raw configs are cached separately.
 export const getConfiguration = unstable_cache(loadConfiguration, ["store-configuration"], { tags: ["configuration"] });
 
 // White-label: rewrite the branding image URLs to our opaque /api/image proxy so the client never sees
