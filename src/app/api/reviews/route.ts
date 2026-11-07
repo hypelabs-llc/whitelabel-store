@@ -1,7 +1,9 @@
-import { getConnect, connectRoute } from "@/lib/connect";
+import { getCustomerConnect, connectRoute } from "@/lib/connect";
 
 export const dynamic = "force-dynamic";
 
 export const GET = connectRoute(async () => {
-	return (await getConnect().reviews.get()) ?? [];
+	const client = await getCustomerConnect();
+	if (!client) return [];
+	return (await client.reviews.get()) ?? [];
 });

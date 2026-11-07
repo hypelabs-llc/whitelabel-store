@@ -1,17 +1,11 @@
-// /api/orders — the signed-in customer's orders (trials included), from Connect.
-//
-// TODO(customer-scoped-api): this is customer-scoped data served with the org API key + a customerId
-// filter. Switch to the dedicated customer-scoped API (customer authenticated directly) once available,
-// so the store never queries with org credentials on the customer's behalf.
-import { getConnect, connectRoute } from "@/lib/connect";
-import { auth } from "@/auth";
+// /api/orders — the signed-in customer's orders (trials included), from the customer-scoped Connect API.
+// The customer JWT scopes the result; no org key and no manual customerId filter.
+import { getCustomerConnect, connectRoute } from "@/lib/connect";
 
 export const dynamic = "force-dynamic";
 
 export const GET = connectRoute(async () => {
-	const session = await auth();
-	const customerId = session?.user?.id;
-	if (!customerId) return [];
-
-	return (await getConnect().orders.get({ queryParameters: { customerId } })) ?? [];
+	const client = await getCustomerConnect();
+	if (!client) return [];
+	return (await client.orders.get()) ?? [];
 });
