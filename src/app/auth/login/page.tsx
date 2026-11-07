@@ -65,13 +65,13 @@ export default function Login() {
 				<span className="h-px flex-1 bg-line" />
 			</div>
 
-			{/* Social sign-in. GitHub goes through NextAuth's GitHub OAuth, then the identity is exchanged
-			    for a Connect customer session server-side. Google isn't wired to OAuth yet. */}
+			{/* Social sign-in. Each provider goes through NextAuth's OAuth, then the identity is exchanged
+			    for a Connect customer session server-side. */}
 			<div className="space-y-3">
 				<button
 					type="button"
-					disabled
-					className="flex w-full cursor-not-allowed items-center justify-center gap-2.5 rounded-lg border border-line bg-surface px-4 py-2.5 text-sm font-medium text-fg opacity-50"
+					onClick={() => signIn("google", { callbackUrl: "/" })}
+					className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-line bg-surface px-4 py-2.5 text-sm font-medium text-fg transition-colors hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand/20"
 				>
 					<FcGoogle className="size-4" />
 					{t("auth.continueWithGoogle")}

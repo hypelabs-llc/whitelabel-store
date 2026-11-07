@@ -1,13 +1,18 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 import { getConnect } from "@/lib/connect";
 import { maskImageUrl } from "@/lib/imageProxy";
 import type { CustomerAuthResponse } from "@hypelabs-llc/ts-sdk";
 
-// Exchanges an identity our front-end already verified with an external provider (e.g. GitHub) for a
-// Connect customer session. Connect trusts the attested identity (it never calls the provider itself),
-// links it to an existing customer with the same email or creates one, and returns the bearer token.
+// OAuth providers wired to the Connect OAuth exchange. Keyed by NextAuth provider id; the value is the
+// provider key Connect stores (lower-case, as its API normalizes it).
+const OAUTH_PROVIDERS: Record<string, string> = { github: "github", google: "google" };
+
+// Exchanges an identity our front-end already verified with an external provider (GitHub, Google, ...)
+// for a Connect customer session. Connect trusts the attested identity (it never calls the provider
+// itself), links it to an existing customer with the same email or creates one, and returns the token.
 async function exchangeOAuthForCustomer(input: {
 	provider: string;
 	providerId: string;
@@ -38,6 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		// Request user:email so we always get a usable email — Connect needs one to create a customer
 		// on a first sign-in, and GitHub users may keep their primary email private.
 		GitHub({ authorization: { params: { scope: "read:user user:email" } } }),
+		Google,
 		Credentials({
 			credentials: {
 				email: { label: "Email", type: "email" },
@@ -80,12 +86,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 	session: { strategy: "jwt" },
 	callbacks: {
 		// Reject an OAuth sign-in that Connect won't accept (suspended account, or no email on a
-		// first-time GitHub sign-in) instead of creating a session with no customer behind it.
+		// first-time sign-in) instead of creating a session with no customer behind it.
 		signIn: async ({ account, profile }) => {
-			if (account?.provider !== "github") return true;
+			const providerKey = account?.provider ? OAUTH_PROVIDERS[account.provider] : undefined;
+			if (!account || !providerKey) return true; // not an OAuth provider (e.g. credentials)
 			const customer = await exchangeOAuthForCustomer({
-				provider: "github",
-				providerId: String(profile?.id ?? account.providerAccountId),
+				provider: providerKey,
+				// GitHub exposes the account id as profile.id, Google as profile.sub; fall back to NextAuth's
+				// normalized providerAccountId.
+				providerId: String(profile?.id ?? profile?.sub ?? account.providerAccountId),
 				email: typeof profile?.email === "string" ? profile.email : undefined,
 				displayName: typeof profile?.name === "string" ? profile.name : undefined,
 			});
