@@ -16,7 +16,9 @@ export function getConnect(): ReturnType<typeof createConnectClient> {
 		if (!apiKey) {
 			throw new Error("CONNECT_API_KEY is not set. Add it to .env.local (server-side only).");
 		}
-		connect = createConnectClient(apiKey);
+		// CONNECT_API_URL overrides the SDK's default base URL (e.g. to point at a staging Connect).
+		// Leave it unset in production to use the SDK default.
+		connect = createConnectClient(apiKey, process.env.CONNECT_API_URL);
 	}
 	return connect;
 }
