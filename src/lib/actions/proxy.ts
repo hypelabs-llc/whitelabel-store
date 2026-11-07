@@ -1,19 +1,30 @@
 "use server";
 
-// Server Actions for proxy actions. They run on the server so the Connect SDK (and its API key) never
-// reaches the browser. Results cross back to the client through toPlain() as plain-data objects.
+// Server Actions for proxy actions. They run on the server so neither the customer JWT nor the org API
+// key reaches the browser. Results cross back to the client through toPlain() as plain-data objects.
 //
-// TODO(customer-scoped-api): these are customer-scoped actions served with the org API key. Switch to
-// the dedicated customer-scoped API once available, and verify the proxy belongs to the signed-in customer.
+// Most actions use the customer-scoped client (getCustomerConnect): the token identifies the customer,
+// so the proxy is implicitly checked to belong to them. A few endpoints aren't on the customer surface
+// yet (ping, annotations) and still use the org client.
+// TODO(customer-scoped-api): move pingProxy / updateProxyComment to the customer client once the
+// customer surface exposes proxies/{id}/ping and /annotations, and drop getConnect() here.
 
 import { headers } from "next/headers";
-import { getConnect } from "@/lib/connect";
+import { getConnect, getCustomerConnect } from "@/lib/connect";
 import { toPlain } from "@hypelabs-llc/ts-sdk";
 import type { ProxyPingResponse, ProxyCredentialResponse, UpdateProxyCredentialsRequest, IpRotationLinkResponse, ProxyOptions, UpdateProxyOptionsRequest, Plain } from "@hypelabs-llc/ts-sdk";
+
+// Resolves the customer-scoped client or throws a sign-in error (used by the customer-scoped actions).
+async function customer() {
+	const client = await getCustomerConnect();
+	if (!client) throw new Error("You must be signed in.");
+	return client;
+}
 
 /** Checks that a proxy is reachable through its own credentials and measures its latency. */
 export async function pingProxy(proxyId: string): Promise<Plain<ProxyPingResponse> | null> {
 	if (!proxyId) throw new Error("proxyId is required");
+	// Not on the customer surface yet — still served with the org key.
 	const result = await getConnect().proxies.byProxyId(proxyId).ping.post();
 	return result ? toPlain(result) : null;
 }
@@ -21,7 +32,7 @@ export async function pingProxy(proxyId: string): Promise<Plain<ProxyPingRespons
 /** Reads a proxy's current authentication credentials (to pre-fill the change dialog). */
 export async function getProxyCredentials(proxyId: string): Promise<Plain<ProxyCredentialResponse> | null> {
 	if (!proxyId) throw new Error("proxyId is required");
-	const result = await getConnect().proxies.byProxyId(proxyId).credentials.get();
+	const result = await (await customer()).proxies.byProxyId(proxyId).credentials.get();
 	return result ? toPlain(result) : null;
 }
 
@@ -31,7 +42,7 @@ export async function getProxyCredentials(proxyId: string): Promise<Plain<ProxyC
  */
 export async function updateProxyCredentials(proxyId: string, request: UpdateProxyCredentialsRequest): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
-	await getConnect().proxies.byProxyId(proxyId).credentials.put(request);
+	await (await customer()).proxies.byProxyId(proxyId).credentials.put(request);
 }
 
 /**
@@ -41,19 +52,19 @@ export async function updateProxyCredentials(proxyId: string, request: UpdatePro
 export async function updateProxyIpRotation(proxyId: string, minutes: number | null): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
 	const intervalSeconds = minutes && minutes > 0 ? Math.round(minutes * 60) : 0;
-	await getConnect().proxies.byProxyId(proxyId).ipRotation.put({ intervalSeconds });
+	await (await customer()).proxies.byProxyId(proxyId).ipRotation.put({ intervalSeconds });
 }
 
 /** Triggers an immediate IP rotation on the proxy ("rotate now"). */
 export async function triggerIpRotation(proxyId: string): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
-	await getConnect().proxies.byProxyId(proxyId).ipRotation.trigger.post();
+	await (await customer()).proxies.byProxyId(proxyId).ipRotation.trigger.post();
 }
 
 /** Generates (fetches) the proxy's IP rotation link, served on the org's rotation domain. */
 export async function getIpRotationLink(proxyId: string): Promise<Plain<IpRotationLinkResponse> | null> {
 	if (!proxyId) throw new Error("proxyId is required");
-	const result = await getConnect().proxies.byProxyId(proxyId).ipRotation.link.get();
+	const result = await (await customer()).proxies.byProxyId(proxyId).ipRotation.link.get();
 	return result ? toPlain(result) : null;
 }
 
@@ -68,13 +79,15 @@ export async function getClientIp(): Promise<string | null> {
 /** Updates a proxy's free-form note (annotation). */
 export async function updateProxyComment(proxyId: string, comment: string): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
+	// Not on the customer surface yet — still served with the org key.
 	await getConnect().proxies.byProxyId(proxyId).annotations.patch({ note: comment ?? "" });
 }
 
 /** Reads a proxy's feature options (e.g. resolution mode), or the defaults when none are set yet. */
 export async function getProxyOptions(proxyId: string): Promise<Plain<ProxyOptions> | null> {
 	if (!proxyId) throw new Error("proxyId is required");
-	const result = await getConnect().proxies.byProxyId(proxyId).options.get();
+	// The customer client names this builder `optionsPath` (not `options`).
+	const result = await (await customer()).proxies.byProxyId(proxyId).optionsPath.get();
 	return result ? toPlain(result) : null;
 }
 
@@ -84,5 +97,5 @@ export async function getProxyOptions(proxyId: string): Promise<Plain<ProxyOptio
  */
 export async function updateProxyOptions(proxyId: string, request: UpdateProxyOptionsRequest): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
-	await getConnect().proxies.byProxyId(proxyId).options.put(request);
+	await (await customer()).proxies.byProxyId(proxyId).optionsPath.put(request);
 }
