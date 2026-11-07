@@ -1,7 +1,9 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
-import { createConnectClient, toPlain } from "@hypelabs-llc/ts-sdk";
+import { headers } from "next/headers";
+import { getToken } from "next-auth/jwt";
+import { createConnectClient, createCustomerClient, toPlain } from "@hypelabs-llc/ts-sdk";
 import { FALLBACK_CONFIGURATION } from "@/contexts/configuration/configuration";
 import { maskImageUrl } from "@/lib/imageProxy";
 import type { Configuration } from "@/contexts/configuration/configuration";
@@ -21,6 +23,27 @@ export function getConnect(): ReturnType<typeof createConnectClient> {
 		connect = createConnectClient(apiKey, process.env.CONNECT_API_URL);
 	}
 	return connect;
+}
+
+// Returns a Connect client authenticated as the logged-in customer (Authorization: Bearer <JWT>),
+// or null when there's no valid session token. The customer JWT is read from the NextAuth session
+// token (httpOnly, server-side only) — it is never exposed to the browser. Not memoized: the client
+// is request-scoped because the token is per-customer.
+export async function getCustomerConnect(): Promise<ReturnType<typeof createCustomerClient> | null> {
+	const token = await getToken({
+		req: { headers: await headers() },
+		secret: process.env.AUTH_SECRET,
+		// NextAuth sets a __Secure- prefixed cookie over HTTPS; match it so we read the right one.
+		secureCookie: process.env.NODE_ENV === "production",
+	});
+
+	const accessToken = token?.accessToken;
+	const expires = token?.accessTokenExpires;
+	if (!accessToken) return null;
+	// Treat an expired token as no session rather than making a doomed Bearer call.
+	if (typeof expires === "number" && expires <= Date.now()) return null;
+
+	return createCustomerClient(accessToken, process.env.CONNECT_API_URL);
 }
 
 // Loads the tenant's white-label configuration from Connect: branding from `organizations.branding`,

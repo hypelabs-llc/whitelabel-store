@@ -27,15 +27,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					return null;
 				}
 
-				if (!customer?.userId || customer.isBanned) return null;
+				// isActive is false for suspended accounts. Also require a token: without it we can't
+				// make customer-scoped Connect calls.
+				if (!customer?.userId || customer.isActive === false || !customer.accessToken) return null;
 
 				// The returned object becomes the JWT/session user. Mask the avatar so the upstream host
-				// never reaches the client (white-label).
+				// never reaches the client (white-label). accessToken/expiresAt are read by the jwt
+				// callback below and kept on the server-side token only — never sent to the browser.
 				return {
 					id: String(customer.userId),
 					email: customer.email ?? undefined,
 					name: customer.name ?? undefined,
 					image: maskImageUrl(customer.avatar) ?? undefined,
+					accessToken: customer.accessToken,
+					accessTokenExpires: customer.expiresAt ? new Date(customer.expiresAt).getTime() : undefined,
 				};
 			},
 		}),
@@ -45,11 +50,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 	},
 	session: { strategy: "jwt" },
 	callbacks: {
-		// Persist the customer id (and email) on the token so they're available on the session.
+		// Persist the customer id/email and the customer JWT on the token. The token is httpOnly and
+		// server-side only; the accessToken is deliberately NOT copied onto the session (see below).
 		jwt: ({ token, user }) => {
 			if (user) {
 				token.id = user.id;
 				token.email = user.email;
+				token.accessToken = user.accessToken;
+				token.accessTokenExpires = user.accessTokenExpires;
 			}
 			return token;
 		},
