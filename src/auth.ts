@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { getConnect } from "@/lib/connect";
+import { getCustomerConnect } from "@/lib/connect";
 import { maskImageUrl } from "@/lib/imageProxy";
 import type { CustomerAuthResponse } from "@hypelabs-llc/ts-sdk";
 
@@ -20,7 +20,8 @@ async function exchangeOAuthForCustomer(input: {
 	displayName?: string;
 }): Promise<CustomerAuthResponse | null> {
 	try {
-		const customer = await getConnect().customers.authenticate.oauth.post({
+		const connect = (await getCustomerConnect({ anonymous: true }))!;
+		const customer = await connect.customers.authenticate.oauth.post({
 			provider: input.provider,
 			providerId: input.providerId,
 			email: input.email,
@@ -56,7 +57,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 				let customer;
 				try {
-					customer = await getConnect().customers.authenticate.post({ email, password });
+					const connect = (await getCustomerConnect({ anonymous: true }))!;
+					customer = await connect.customers.authenticate.post({ email, password });
 				} catch {
 					// The SDK throws on non-2xx (e.g. 401 bad credentials) — treat as auth failure.
 					return null;

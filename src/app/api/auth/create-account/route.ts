@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { getConnect } from "@/lib/connect";
+import { getCustomerConnect } from "@/lib/connect";
 
 // Server-side account creation. The register form posts { name, email, password, confirmPassword,
-// acceptTerms } here; this handler validates, then creates the customer against the HypeLabs Partner
-// API (server-side, with the secret key). On success the client signs in via NextAuth credentials.
+// acceptTerms } here; this handler validates, then creates the customer through the anonymous customer
+// client (scoped to the org via X-Organization-Id, no secret key). On success the client signs in via
+// NextAuth credentials.
 
 // Error body shaped like what the register form reads: { message, errors: [{ description }] }.
 function errorResponse(message: string, description: string, status: number) {
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
 
 	let customer;
 	try {
-		customer = await getConnect().customers.post({ email, password, displayName: name });
+		const connect = (await getCustomerConnect({ anonymous: true }))!;
+		customer = await connect.customers.post({ email, password, displayName: name });
 	} catch {
 		// The SDK throws on non-2xx (e.g. 409 email already used, 422 validation).
 		return errorResponse("Registration failed.", "Could not create the account. The email may already be in use.", 400);

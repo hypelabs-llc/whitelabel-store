@@ -3,33 +3,40 @@ import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { getToken } from "next-auth/jwt";
-import { createConnectClient, createCustomerClient, toPlain } from "@hypelabs-llc/ts-sdk";
+import { createCustomerClient, toPlain } from "@hypelabs-llc/ts-sdk";
 import { FALLBACK_CONFIGURATION } from "@/contexts/configuration/configuration";
 import { maskImageUrl } from "@/lib/imageProxy";
 import type { Configuration } from "@/contexts/configuration/configuration";
 
-// Initialize on the first API call so builds do not require runtime credentials.
-// `server-only` keeps the client and its API key out of browser bundles.
-let connect: ReturnType<typeof createConnectClient> | undefined;
+// `server-only` keeps the Connect client out of browser bundles. The store talks to Connect only through
+// the customer client — anonymous (X-Organization-Id) before sign-in, Bearer after — so there's no org
+// API key anywhere in the store.
 
-export function getConnect(): ReturnType<typeof createConnectClient> {
-	if (!connect) {
-		const apiKey = process.env.CONNECT_API_KEY;
-		if (!apiKey) {
-			throw new Error("CONNECT_API_KEY is not set. Add it to .env.local (server-side only).");
-		}
-		// CONNECT_API_URL overrides the SDK's default base URL (e.g. to point at a staging Connect).
-		// Leave it unset in production to use the SDK default.
-		connect = createConnectClient(apiKey, process.env.CONNECT_API_URL);
-	}
-	return connect;
+// The org the store sells for. The customer client (anonymous or Bearer) sends it as X-Organization-Id so
+// Connect scopes anonymous endpoints (authenticate, sign-up, branding) to this org.
+function orgId(): string {
+	const value = process.env.CONNECT_ORG_ID;
+	if (!value) throw new Error("CONNECT_ORG_ID is not set. Add it to .env.local (server-side only).");
+	return value;
 }
 
-// Returns a Connect client authenticated as the logged-in customer (Authorization: Bearer <JWT>),
-// or null when there's no valid session token. The customer JWT is read from the NextAuth session
-// token (httpOnly, server-side only) — it is never exposed to the browser. Not memoized: the client
-// is request-scoped because the token is per-customer.
-export async function getCustomerConnect(): Promise<ReturnType<typeof createCustomerClient> | null> {
+// Options shared by every customer client: the org id, plus the optional base-URL override.
+function customerOptions() {
+	return { organizationId: orgId(), baseUrl: process.env.CONNECT_API_URL };
+}
+
+// The customer-scoped Connect client.
+//
+// - getCustomerConnect() returns a client authenticated as the logged-in customer (Authorization: Bearer
+//   <JWT>), or null when there's no valid session. The JWT is read from the NextAuth session token
+//   (httpOnly, server-side only) and never reaches the browser.
+// - getCustomerConnect({ anonymous: true }) returns an anonymous client (no token, only X-Organization-Id)
+//   for the pre-sign-in endpoints — customers.authenticate and sign-up — so the org secret is never used.
+//
+// Not memoized: the client is request-scoped because the token is per-customer.
+export async function getCustomerConnect(options?: { anonymous: true }): Promise<ReturnType<typeof createCustomerClient> | null> {
+	if (options?.anonymous) return createCustomerClient(undefined, customerOptions());
+
 	const token = await getToken({
 		req: { headers: await headers() },
 		secret: process.env.AUTH_SECRET,
@@ -43,17 +50,19 @@ export async function getCustomerConnect(): Promise<ReturnType<typeof createCust
 	// Treat an expired token as no session rather than making a doomed Bearer call.
 	if (typeof expires === "number" && expires <= Date.now()) return null;
 
-	return createCustomerClient(accessToken, process.env.CONNECT_API_URL);
+	return createCustomerClient(accessToken, customerOptions());
 }
 
 // Loads the tenant's white-label configuration from Connect: branding from `organizations.branding`,
-// storefront settings from `organizations.store`. Falls back to the neutral fallback config if both fail.
+// storefront settings from `organizations.store`. These are anonymous (org-scoped) endpoints, so the
+// config renders before sign-in through the anonymous customer client. Falls back to the neutral config
+// if both fail.
 //
 // `raw` controls the branding image URLs: masked through /api/image by default (safe for the client), or
 // the direct upstream URLs when `raw` is true — ONLY for server-side rendering that fetches the image
 // itself and never hands the URL to the browser (e.g. app/icon.tsx). Never pass a raw config to a client.
 async function loadConfiguration(raw = false): Promise<Configuration> {
-	const client = getConnect();
+	const client = createCustomerClient(undefined, customerOptions());
 
 	const [branding, store] = await Promise.all([
 		client.organizations.branding.get().catch(() => null),
