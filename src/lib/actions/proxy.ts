@@ -3,14 +3,11 @@
 // Server Actions for proxy actions. They run on the server so neither the customer JWT nor the org API
 // key reaches the browser. Results cross back to the client through toPlain() as plain-data objects.
 //
-// Most actions use the customer-scoped client (getCustomerConnect): the token identifies the customer,
-// so the proxy is implicitly checked to belong to them. A few endpoints aren't on the customer surface
-// yet (ping, annotations) and still use the org client.
-// TODO(customer-scoped-api): move pingProxy / updateProxyComment to the customer client once the
-// customer surface exposes proxies/{id}/ping and /annotations, and drop getConnect() here.
+// All actions use the customer-scoped client (getCustomerConnect): the token identifies the customer, so
+// the proxy is implicitly checked to belong to them.
 
 import { headers } from "next/headers";
-import { getConnect, getCustomerConnect } from "@/lib/connect";
+import { getCustomerConnect } from "@/lib/connect";
 import { toPlain } from "@hypelabs-llc/ts-sdk";
 import type { ProxyPingResponse, ProxyCredentialResponse, UpdateProxyCredentialsRequest, IpRotationLinkResponse, ProxyOptions, UpdateProxyOptionsRequest, Plain } from "@hypelabs-llc/ts-sdk";
 
@@ -24,8 +21,7 @@ async function customer() {
 /** Checks that a proxy is reachable through its own credentials and measures its latency. */
 export async function pingProxy(proxyId: string): Promise<Plain<ProxyPingResponse> | null> {
 	if (!proxyId) throw new Error("proxyId is required");
-	// Not on the customer surface yet — still served with the org key.
-	const result = await getConnect().proxies.byProxyId(proxyId).ping.post();
+	const result = await (await customer()).proxies.byProxyId(proxyId).ping.post();
 	return result ? toPlain(result) : null;
 }
 
@@ -79,8 +75,7 @@ export async function getClientIp(): Promise<string | null> {
 /** Updates a proxy's free-form note (annotation). */
 export async function updateProxyComment(proxyId: string, comment: string): Promise<void> {
 	if (!proxyId) throw new Error("proxyId is required");
-	// Not on the customer surface yet — still served with the org key.
-	await getConnect().proxies.byProxyId(proxyId).annotations.patch({ note: comment ?? "" });
+	await (await customer()).proxies.byProxyId(proxyId).annotations.patch({ note: comment ?? "" });
 }
 
 /** Reads a proxy's feature options (e.g. resolution mode), or the defaults when none are set yet. */

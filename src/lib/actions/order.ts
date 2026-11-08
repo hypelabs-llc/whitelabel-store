@@ -8,11 +8,17 @@
 // object (no Kiota Parsable methods / additionalData) — safe for the React server/client boundary,
 // no hand-written DTOs. Disabled entries are filtered out server-side (disabled = hidden).
 
-import { getConnect } from "@/lib/connect";
-import { auth } from "@/auth";
+import { getCustomerConnect } from "@/lib/connect";
 import { toPlain } from "@hypelabs-llc/ts-sdk";
 import type { PreviewOrderResponse, CreateOrderResponse, ExtendOrderRequest, ExtendOrderResponse, Plain } from "@hypelabs-llc/ts-sdk";
 import type { BillingCycles, PaymentMethods, CapabilityTypes } from "@hypelabs-llc/ts-sdk";
+
+// Resolves the customer-scoped client or throws a sign-in error. The customer is identified by the token.
+async function customer() {
+	const client = await getCustomerConnect();
+	if (!client) throw new Error("You must be signed in.");
+	return client;
+}
 
 export interface OrderSelection {
 	productId: string;
@@ -40,7 +46,7 @@ function orderCriteria(selection: OrderSelection, paymentMethod?: PaymentMethods
 
 /** Live price preview for the current selection. */
 export async function previewOrder(selection: OrderSelection): Promise<Plain<PreviewOrderResponse> | null> {
-	const preview = await getConnect().orders.preview.post({
+	const preview = await (await customer()).orders.preview.post({
 		quantity: selection.quantity,
 		criteria: orderCriteria(selection),
 	});
@@ -53,13 +59,9 @@ export async function createOrder(
 	paymentMethod: PaymentMethods,
 	isAutoRenew = false,
 ): Promise<Plain<CreateOrderResponse> | null> {
-	const session = await auth();
-	const customerId = session?.user?.id;
-	if (!customerId) throw new Error("You must be signed in to place an order.");
-
-	const order = await getConnect().orders.post({
+	// The customer is identified by the token, so customerId is no longer passed.
+	const order = await (await customer()).orders.post({
 		quantity: selection.quantity,
-		customerId,
 		isAutoRenew,
 		criteria: orderCriteria(selection, paymentMethod),
 	});
@@ -69,7 +71,7 @@ export async function createOrder(
 /** Renews an existing order for another billing cycle. Returns the extend result (may carry a payment url). */
 export async function extendOrder(orderId: string, request: ExtendOrderRequest): Promise<Plain<ExtendOrderResponse> | null> {
 	if (!orderId) throw new Error("orderId is required");
-	const result = await getConnect().orders.byId(orderId).extend.post(request);
+	const result = await (await customer()).orders.byId(orderId).extend.post(request);
 	return result ? toPlain(result) : null;
 }
 
@@ -79,5 +81,5 @@ export async function extendOrder(orderId: string, request: ExtendOrderRequest):
  */
 export async function cancelOrder(orderId: string, immediate = false): Promise<void> {
 	if (!orderId) throw new Error("orderId is required");
-	await getConnect().orders.byId(orderId).delete({ immediateCancellation: immediate, askRefund: false });
+	await (await customer()).orders.byId(orderId).delete({ immediateCancellation: immediate, askRefund: false });
 }

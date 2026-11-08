@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@headlessui/react": "^2.2.10",
-		"@hypelabs-llc/ts-sdk": "^0.3.0",
+		"@hypelabs-llc/ts-sdk": "^0.3.1",
 		"@tremor/react": "^3.18.7",
 		"@webscopeio/react-health-check": "^3.0.1",
 		"axios": "^1.20.0",
