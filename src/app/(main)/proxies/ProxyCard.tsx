@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardList, Copy, Globe, Info, KeyRound, Loader2, Pencil, Sparkles, Timer } from "lucide-react";
+import { ClipboardList, Copy, Globe, Info, KeyRound, Loader2, Pencil, Settings2, Sparkles, Timer } from "lucide-react";
 import UpdateCommentDialog from "./UpdateCommentDialog";
 import { Badge, Button, Card, Tooltip } from "@/components/ui";
 import { CheckProxyButton } from "./CheckProxyButton";
@@ -15,6 +15,7 @@ import { getIpRotationLink } from "@/lib/actions/proxy";
 import RotateIpButton from "./RotateIpButton";
 import ChangeCredentialsDialog from "./ChangeCredentialsDialog";
 import IpRotationDialog from "./IpRotationDialog";
+import ProxyOptionsDialog from "./ProxyOptionsDialog";
 import { useTranslation } from "react-i18next";
 
 import type { Order, Proxy, Plain } from "@hypelabs-llc/ts-sdk";
@@ -58,6 +59,7 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 	const [commentOpen, setCommentOpen] = useState(false);
 	const [credentialsOpen, setCredentialsOpen] = useState(false);
 	const [rotationOpen, setRotationOpen] = useState(false);
+	const [optionsOpen, setOptionsOpen] = useState(false);
 	// The IP rotation link is generated on demand: the field starts empty and "Generate" fetches it.
 	const [rotationLink, setRotationLink] = useState("");
 	const [generatingLink, setGeneratingLink] = useState(false);
@@ -85,6 +87,7 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 	const ispName = proxy.isp?.name;
 	const ispLogo = proxy.isp?.logoUrl ?? (proxy.isp?.id ? ispIconUrl(proxy.isp.id) : undefined);
 	const rotationMinutes = proxy.features?.ipRotation?.intervalMinutes;
+	const hasIpv6 = (proxy.capabilities ?? []).includes("Ipv6");
 	return (
 		<Card className={"group space-y-5"}>
 			<div className={"flex items-center justify-between gap-3"}>
@@ -172,11 +175,15 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 				<Button onClick={() => setCredentialsOpen(true)} icon={KeyRound} variant={"secondary"} className={"flex-1"}>
 					{t("proxies.credentials")}
 				</Button>
+				<Button onClick={() => setOptionsOpen(true)} icon={Settings2} variant={"secondary"} className={"flex-1"}>
+					{t("proxies.proxyOptions")}
+				</Button>
 			</div>
 
 			<UpdateCommentDialog isOpen={commentOpen} initialComment={proxy.note ?? ""} onClose={() => setCommentOpen(false)} onSubmit={handleUpdateComment} />
 			<ChangeCredentialsDialog proxyId={proxyId} username={""} password={""} isOpen={credentialsOpen} onClose={() => setCredentialsOpen(false)} />
 			<IpRotationDialog proxyId={proxyId} interval={rotationMinutes} isOpen={rotationOpen} onClose={() => setRotationOpen(false)} />
+			<ProxyOptionsDialog proxyId={proxyId} hasIpv6={hasIpv6} isOpen={optionsOpen} onClose={() => setOptionsOpen(false)} />
 		</Card>
 	);
 }
