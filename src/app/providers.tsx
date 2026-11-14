@@ -40,10 +40,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
-		// No global refreshInterval and revalidation off: we don't want the SPA auto-polling the
-		// old API. SWR stays available for components we port, but data comes from the server side.
+		// Global SWR defaults: poll every 60s and revalidate on focus/reconnect, so live views (orders,
+		// proxies and their time-left badges) stay current without each component wiring its own interval.
 		<SessionProvider>
-			<SWRConfig value={{ fetcher, suspense: true, revalidateOnFocus: false, revalidateOnReconnect: false }}>
+			<SWRConfig value={{ fetcher, suspense: true, refreshInterval: 60_000 }}>
 				<HealthCheckConfig
 					value={{
 						// TODO: point at our own /api/health proxy; for now hit Connect's /health directly.
