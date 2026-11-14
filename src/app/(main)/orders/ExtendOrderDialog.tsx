@@ -1,29 +1,33 @@
 "use client";
 
-import { type SubmitEvent, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import { Button, Modal } from "@/components/ui";
 import { History } from "lucide-react";
 import { toast } from "sonner";
-import { mutate } from "swr";
-import { BILLING_CYCLES, BILLING_ICONS } from "@/constants";
+import useSWR, { mutate } from "swr";
+import { BILLING_CYCLES, BILLING_ICONS, PAYMENT_ICONS } from "@/constants";
 import { OptionChip } from "./create/OptionChip";
 import { extendOrder } from "@/lib/actions/order";
-import { BillingCyclesObject, PaymentMethodsObject } from "@hypelabs-llc/ts-sdk";
+import { BillingCyclesObject } from "@hypelabs-llc/ts-sdk";
 import type { BillingCycles, PaymentMethods } from "@hypelabs-llc/ts-sdk";
 import { useTranslation } from "react-i18next";
-
-// Same single payment method the order builder offers; extend reuses it.
-const PAYMENT_METHODS: PaymentMethods[] = [PaymentMethodsObject.Cryptocurrency];
 
 export default function ExtendOrderDialog({ orderId, isOpen, onClose }: { orderId: string | null; isOpen: boolean; onClose: () => void }) {
 	const { t } = useTranslation();
 	const [billingCycle, setBillingCycle] = useState<BillingCycles>(BillingCyclesObject.Monthly);
-	const [paymentMethod] = useState<PaymentMethods>(PAYMENT_METHODS[0]);
+	const [paymentMethod, setPaymentMethod] = useState<PaymentMethods | null>(null);
 	const [loading, setLoading] = useState(false);
+
+	// Payment methods the org accepts (same source as the order builder), not a hardcoded pair.
+	const { data: paymentMethods = [] } = useSWR<PaymentMethods[]>("/api/payment-methods", { suspense: false });
+	useEffect(() => {
+		if (paymentMethods.length === 0) return;
+		if (!paymentMethod || !paymentMethods.includes(paymentMethod)) setPaymentMethod(paymentMethods[0]);
+	}, [paymentMethods, paymentMethod]);
 
 	const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		if (!orderId) return;
+		if (!orderId || !paymentMethod) return;
 		setLoading(true);
 		try {
 			const result = await extendOrder(orderId, { billingCycle, paymentMethod });
@@ -57,6 +61,21 @@ export default function ExtendOrderDialog({ orderId, isOpen, onClose }: { orderI
 								icon={BILLING_ICONS[String(cycle)]}
 								label={t(`billingCycle.${String(cycle).toLowerCase()}`)}
 								onClick={() => setBillingCycle(cycle)}
+							/>
+						))}
+					</div>
+				</div>
+
+				<div className={"space-y-3"}>
+					<label className={"block text-sm font-medium text-fg-strong"}>{t("orderDialog.paymentMethod")}</label>
+					<div className={"flex flex-wrap gap-2"}>
+						{paymentMethods.map((method) => (
+							<OptionChip
+								key={method}
+								selected={paymentMethod === method}
+								icon={PAYMENT_ICONS[method]}
+								label={t(`paymentMethod.${String(method).toLowerCase()}`)}
+								onClick={() => setPaymentMethod(method)}
 							/>
 						))}
 					</div>

@@ -17,9 +17,6 @@ import { PaymentMethodSelector } from "./PaymentMethodSelector";
 import { OrderSummaryPanel } from "./OrderSummaryPanel";
 import { OrderSummaryDrawer } from "./OrderSummaryDrawer";
 
-// Only crypto is offered for now.
-const PAYMENT_METHODS: PaymentMethods[] = [PaymentMethodsObject.Cryptocurrency];
-
 // Orchestrates the order flow: holds the selection state, drives the location → ISP cascade and the
 // live price preview through server actions, and composes the step selectors + summary. Product is
 // hardcoded (Mobile Proxies) for now, so there is no visible product step.
@@ -44,8 +41,18 @@ export function OrderBuilder() {
 	const [quantity, setQuantity] = useState(1);
 	const [autoRenew, setAutoRenew] = useState(true);
 	const [billingCycle, setBillingCycle] = useState<BillingCycles>(BillingCyclesObject.Monthly);
-	const [paymentMethod, setPaymentMethod] = useState<PaymentMethods | null>(PAYMENT_METHODS[0] ?? null);
+	const [paymentMethod, setPaymentMethod] = useState<PaymentMethods | null>(null);
 	const [preview, setPreview] = useState<Plain<PreviewOrderResponse> | null>(null);
+
+	// Payment methods the org accepts, derived server-side from its configured processors. Fetched instead
+	// of hardcoded so a tenant that only wired crypto (or only cards) shows just that.
+	const { data: paymentMethods = [] } = useSWR<PaymentMethods[]>("/api/payment-methods", { suspense: false });
+
+	// Default to the first available method once they load, and keep the selection valid if the list changes.
+	useEffect(() => {
+		if (paymentMethods.length === 0) return;
+		if (!paymentMethod || !paymentMethods.includes(paymentMethod)) setPaymentMethod(paymentMethods[0]);
+	}, [paymentMethods, paymentMethod]);
 
 	const [submitting, startSubmitting] = useTransition();
 
@@ -185,7 +192,7 @@ export function OrderBuilder() {
 				<IspSelector index="02" isps={isps} loading={loadingIsps} selectedId={ispId} onSelect={setIspId} />
 				<CapabilitySelector index="03" capabilities={capabilities} loading={loadingCapabilities} selected={selectedCapabilities} onToggle={toggleCapability} />
 				<BillingCycleSelector index="04" value={billingCycle} onChange={setBillingCycle} />
-				<PaymentMethodSelector index="05" methods={PAYMENT_METHODS} value={paymentMethod} onChange={setPaymentMethod} />
+				<PaymentMethodSelector index="05" methods={paymentMethods} value={paymentMethod} onChange={setPaymentMethod} />
 			</div>
 
 			{/* Sticky panel on desktop, Vaul bottom-sheet on mobile. */}

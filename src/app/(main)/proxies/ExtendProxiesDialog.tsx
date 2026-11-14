@@ -6,25 +6,29 @@ import { History } from "lucide-react";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { ispIconUrl, shortId, timeLeft } from "@/lib";
-import { BILLING_CYCLES, BILLING_ICONS } from "@/constants";
+import { BILLING_CYCLES, BILLING_ICONS, PAYMENT_ICONS } from "@/constants";
 import { OptionChip } from "../orders/create/OptionChip";
 import { extendOrder } from "@/lib/actions/order";
-import { BillingCyclesObject, PaymentMethodsObject } from "@hypelabs-llc/ts-sdk";
+import { BillingCyclesObject } from "@hypelabs-llc/ts-sdk";
 import type { BillingCycles, PaymentMethods, Order, Proxy, Plain } from "@hypelabs-llc/ts-sdk";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
-
-// Same single payment method the order builder and the per-order extend use.
-const PAYMENT_METHODS: PaymentMethods[] = [PaymentMethodsObject.Cryptocurrency];
 
 export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
 	const { t } = useTranslation();
 	const { data: orders } = useSWR<Plain<Order>[]>("/api/orders", { suspense: false });
 	const { data: proxies } = useSWR<Plain<Proxy>[]>("/api/proxies", { suspense: false });
+	const { data: paymentMethods = [] } = useSWR<PaymentMethods[]>("/api/payment-methods", { suspense: false });
 	const [selectedOrderId, setSelectedOrderId] = useState<string>();
 	const [billingCycle, setBillingCycle] = useState<BillingCycles>(BillingCyclesObject.Monthly);
-	const [paymentMethod] = useState<PaymentMethods>(PAYMENT_METHODS[0]);
+	const [paymentMethod, setPaymentMethod] = useState<PaymentMethods | null>(null);
 	const [loading, setLoading] = useState(false);
+
+	// Default to the first available method once the org's methods load, and keep the choice valid.
+	useEffect(() => {
+		if (paymentMethods.length === 0) return;
+		if (!paymentMethod || !paymentMethods.includes(paymentMethod)) setPaymentMethod(paymentMethods[0]);
+	}, [paymentMethods, paymentMethod]);
 
 	// Only active, non-trial orders can be renewed; soonest-to-expire first.
 	const extendable = (orders ?? [])
@@ -45,7 +49,7 @@ export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boole
 
 	const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		if (!selectedOrderId) return;
+		if (!selectedOrderId || !paymentMethod) return;
 		setLoading(true);
 		try {
 			const result = await extendOrder(selectedOrderId, { billingCycle, paymentMethod });
@@ -127,6 +131,21 @@ export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boole
 								icon={BILLING_ICONS[String(cycle)]}
 								label={t(`billingCycle.${String(cycle).toLowerCase()}`)}
 								onClick={() => setBillingCycle(cycle)}
+							/>
+						))}
+					</div>
+				</div>
+
+				<div className={"space-y-3"}>
+					<label className={"block text-sm font-medium text-fg-strong"}>{t("orderDialog.paymentMethod")}</label>
+					<div className={"flex flex-wrap gap-2"}>
+						{paymentMethods.map((method) => (
+							<OptionChip
+								key={method}
+								selected={paymentMethod === method}
+								icon={PAYMENT_ICONS[method]}
+								label={t(`paymentMethod.${String(method).toLowerCase()}`)}
+								onClick={() => setPaymentMethod(method)}
 							/>
 						))}
 					</div>
