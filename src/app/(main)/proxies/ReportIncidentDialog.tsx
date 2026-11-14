@@ -53,8 +53,8 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 				<p className={"text-sm text-muted"}>{t("reportDialog.subtitle")}</p>
 
 				<div className={"space-y-4"}>
-					<div className={"space-y-1.5"}>
-						<label className={"text-sm font-medium text-fg-strong required"}>{t("reportDialog.proxy")}</label>
+					<div className={"space-y-3"}>
+						<label className={"block text-sm font-medium text-fg-strong required"}>{t("reportDialog.proxy")}</label>
 						<select
 							value={selectedProxyId ?? ""}
 							onChange={(event) => setSelectedProxyId(event.target.value || undefined)}
@@ -69,8 +69,8 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 							))}
 						</select>
 					</div>
-					<div className={"space-y-1.5"}>
-						<label className={"text-sm font-medium text-fg-strong required"}>{t("reportDialog.subject")}</label>
+					<div className={"space-y-3"}>
+						<label className={"block text-sm font-medium text-fg-strong required"}>{t("reportDialog.subject")}</label>
 						<TextInput value={subject} onValueChange={setSubject} placeholder={t("reportDialog.subjectPlaceholder")} required />
 						<div className={"flex flex-wrap gap-2 pt-1"}>
 							{SUBJECT_SUGGESTIONS.map((key) => {
@@ -93,8 +93,8 @@ export default function ReportIncidentDialog({ isOpen, proxyId, onClose }: { isO
 							})}
 						</div>
 					</div>
-					<div className={"space-y-1.5"}>
-						<label className={"text-sm font-medium text-fg-strong"}>{t("reportDialog.message")}</label>
+					<div className={"space-y-3"}>
+						<label className={"block text-sm font-medium text-fg-strong"}>{t("reportDialog.message")}</label>
 						<Textarea value={message} onValueChange={setMessage} placeholder={t("reportDialog.messagePlaceholder")} rows={4} />
 					</div>
 				</div>

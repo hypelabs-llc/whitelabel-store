@@ -69,8 +69,8 @@ export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boole
 			<form onSubmit={handleSubmit} className={"space-y-6"}>
 				<p className={"text-sm text-muted"}>{t("extendDialog.subtitle")}</p>
 
-				<div className={"space-y-1.5"}>
-					<label className={"text-sm font-medium text-fg-strong required"}>{t("extendDialog.purchase")}</label>
+				<div className={"space-y-3"}>
+					<label className={"block text-sm font-medium text-fg-strong required"}>{t("extendDialog.purchase")}</label>
 					<select
 						value={selectedOrderId ?? ""}
 						onChange={(event) => setSelectedOrderId(event.target.value || undefined)}
@@ -117,8 +117,8 @@ export default function ExtendProxiesDialog({ isOpen, onClose }: { isOpen: boole
 					</Card>
 				)}
 
-				<div className={"space-y-1.5"}>
-					<label className={"text-sm font-medium text-fg-strong"}>{t("extendOrderDialog.billingCycle")}</label>
+				<div className={"space-y-3"}>
+					<label className={"block text-sm font-medium text-fg-strong"}>{t("extendOrderDialog.billingCycle")}</label>
 					<div className={"flex flex-wrap gap-2"}>
 						{BILLING_CYCLES.map((cycle) => (
 							<OptionChip

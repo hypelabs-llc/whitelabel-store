@@ -47,8 +47,8 @@ export default function ExtendOrderDialog({ orderId, isOpen, onClose }: { orderI
 			<form onSubmit={handleSubmit} className={"space-y-6"}>
 				<p className={"text-sm text-muted"}>{t("extendOrderDialog.subtitle")}</p>
 
-				<div className={"space-y-1.5"}>
-					<label className={"text-sm font-medium text-fg-strong"}>{t("extendOrderDialog.billingCycle")}</label>
+				<div className={"space-y-3"}>
+					<label className={"block text-sm font-medium text-fg-strong"}>{t("extendOrderDialog.billingCycle")}</label>
 					<div className={"flex flex-wrap gap-2"}>
 						{BILLING_CYCLES.map((cycle) => (
 							<OptionChip

@@ -78,8 +78,8 @@ export default function ProxyOptionsDialog({
 						</span>
 					</div>
 
-					<div className={"space-y-1.5"}>
-						<label className={"text-sm font-medium text-fg-strong"}>{t("optionsDialog.resolutionMode")}</label>
+					<div className={"space-y-3"}>
+						<label className={"block text-sm font-medium text-fg-strong"}>{t("optionsDialog.resolutionMode")}</label>
 						<select
 							value={mode}
 							onChange={(event) => setMode(event.target.value as ResolutionModes)}
