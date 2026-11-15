@@ -1,10 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Badge, Button, EmptyState, Heading } from "@/components/ui";
-import { History, Package, ShoppingCart, XCircle } from "lucide-react";
+import { AlertTriangle, History, Package, RefreshCw, ShoppingCart, Timer, XCircle } from "lucide-react";
 import useSWR from "swr";
-import { differenceInDays } from "date-fns";
-import { CopyableId, formatDate, resourceCount, timeLeft } from "@/lib";
+import { CopyableId, formatDate, orderBadge, resourceCount, statusTone } from "@/lib";
 import Link from "next/link";
 import type { Order, Plain } from "@hypelabs-llc/ts-sdk";
 import ExtendOrderDialog from "./ExtendOrderDialog";
@@ -18,23 +17,6 @@ export default function OrdersList() {
 	const [extendOrderId, setExtendOrderId] = useState<string | null>(null);
 	const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
 	const hasOrders = orders.length > 0;
-
-	const statusTone = (status: string): "neutral" | "success" | "warning" | "danger" => {
-		switch (status) {
-			case "Active":
-				return "success";
-			case "Pending":
-				return "warning";
-			case "Expired":
-			case "Cancelled":
-				return "danger";
-			default:
-				return "neutral";
-		}
-	};
-
-	const expiryTone = (daysLeft: number): "success" | "warning" | "danger" =>
-		daysLeft <= 3 ? "danger" : daysLeft <= 7 ? "warning" : "success";
 
 	// Split into live orders (still holding their proxies: Active or in grace) and inactive ones (Expired,
 	// Cancelled, Deleted). Within each group, most recent first — ordered by expiry since the SDK exposes no
@@ -60,8 +42,8 @@ export default function OrdersList() {
 	const renderRow = (order: Plain<Order>) => {
 		const status = order.status ?? "Pending";
 		const count = resourceCount(order);
-		const daysLeft = order.expiresAt ? differenceInDays(new Date(order.expiresAt), new Date()) : null;
-		const expiry = order.expiresAt ? timeLeft(new Date(order.expiresAt)) : null;
+		// Same lifecycle badge the proxy cards show, from the shared lib helper.
+		const badge = orderBadge(order);
 
 		return (
 			<tr key={order.id} className={"transition-colors hover:bg-surface-muted/40"}>
@@ -81,11 +63,19 @@ export default function OrdersList() {
 				<td className={"px-5 py-3"}>
 					<div className={"inline-flex items-center gap-2"}>
 						<Badge tone={statusTone(status)}>{status}</Badge>
-						{expiry !== null && daysLeft !== null && status === "Active" && (
-							<Badge tone={expiryTone(daysLeft)}>
-								{t(`orders.${expiry.unit}`, { count: expiry.value })}
+						{badge?.kind === "auto-renew" ? (
+							<Badge tone={"brand"} icon={RefreshCw}>
+								{t("proxies.autoRenew")}
 							</Badge>
-						)}
+						) : badge?.kind === "grace" ? (
+							<Badge tone={"danger"} icon={AlertTriangle}>
+								{t("proxies.gracePeriod")}
+							</Badge>
+						) : badge?.kind === "time-left" && status === "Active" ? (
+							<Badge tone={badge.tone} icon={Timer}>
+								{t(`orders.${badge.unit}`, { count: badge.value })}
+							</Badge>
+						) : null}
 					</div>
 				</td>
 				<td className={"px-5 py-3"}>

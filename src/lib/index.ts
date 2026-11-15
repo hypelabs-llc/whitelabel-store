@@ -76,6 +76,54 @@ export const timeLeft = (expiresAt: Date): { value: number; unit: "years" | "mon
 	return { value: Math.max(0, differenceInMinutes(expiresAt, now)), unit: "minutes" };
 };
 
+// The lifecycle badge an order earns, shared by the proxy cards and the orders table so the two never
+// drift. In priority order:
+//  - "auto-renew": the order renews itself at expiry instead of lapsing, so a countdown would mislead.
+//  - "grace": already past expiresAt but the grace policy keeps the proxies alive, so a countdown would
+//    show a negative "0m left"; flag the transient grace window instead.
+//  - "time-left": the normal countdown, with a tone set by how close expiry is (not by unit size): plenty
+//    of runway (years/months, or more than a week of days) reads as the brand accent; only the final
+//    stretch warms to amber then red; hours/minutes means within the day, so always danger.
+//  - null: nothing to show (no expiry and not auto-renewing).
+export type OrderBadge =
+	| { kind: "auto-renew" }
+	| { kind: "grace" }
+	| { kind: "time-left"; tone: "brand" | "warning" | "danger"; value: number; unit: "years" | "months" | "days" | "hours" | "minutes" };
+
+export const orderBadge = (order: Pick<Plain<Order>, "isAutoRenew" | "status" | "expiresAt">): OrderBadge | null => {
+	if (order.isAutoRenew === true) return { kind: "auto-renew" };
+	if (order.status === "GracePeriod") return { kind: "grace" };
+	if (!order.expiresAt) return null;
+	const { value, unit } = timeLeft(new Date(order.expiresAt));
+	const tone =
+		unit === "years" || unit === "months"
+			? "brand"
+			: unit === "days"
+				? value <= 3
+					? "danger"
+					: value <= 7
+						? "warning"
+						: "brand"
+				: "danger";
+	return { kind: "time-left", tone, value, unit };
+};
+
+// Badge tone for an order's commercial status, so the status pill reads the same wherever it's shown.
+export const statusTone = (status: string): "neutral" | "success" | "warning" | "danger" => {
+	switch (status) {
+		case "Active":
+			return "success";
+		case "GracePeriod":
+		case "Pending":
+			return "warning";
+		case "Expired":
+		case "Cancelled":
+			return "danger";
+		default:
+			return "neutral";
+	}
+};
+
 // Safe date format: SDK dates can be null/invalid, so render a dash rather than crash.
 export const formatDate = (value: unknown): string => {
 	if (!value) return "-";
