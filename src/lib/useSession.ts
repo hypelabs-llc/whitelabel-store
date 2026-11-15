@@ -11,6 +11,7 @@ import { signIn as nextSignIn, signOut as nextSignOut, useSession as useNextAuth
 export interface SessionUser {
 	userId: string;
 	name?: string | null;
+	email?: string | null;
 	avatarUrl?: string | null;
 }
 
@@ -21,6 +22,7 @@ export function useSession() {
 		? {
 				userId: (data.user as { id?: string }).id ?? "",
 				name: data.user.name,
+				email: data.user.email,
 				avatarUrl: data.user.image,
 			}
 		: null;
