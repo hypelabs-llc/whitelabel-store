@@ -6,6 +6,7 @@ import { useConfiguration } from "@/contexts/configuration";
 import { useSession } from "@/lib/useSession";
 import Banner from "@/components/Banner";
 import CrispChat from "@/components/CrispChat";
+import IntercomChat from "@/components/IntercomChat";
 import { DynamicHead } from "@/components/DynamicHead";
 import Sidebar from "@/components/sidebar";
 import TopBar from "@/components/shell/TopBar";
@@ -52,6 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 			</div>
 
 			{configuration?.store?.crispWorkspaceId && <CrispChat websiteId={configuration.store.crispWorkspaceId} />}
+			{configuration?.store?.intercomAppId && <IntercomChat appId={configuration.store.intercomAppId} />}
 		</div>
 	);
 }
