@@ -85,7 +85,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 	pages: {
 		signIn: "/auth/login",
 	},
-	session: { strategy: "jwt" },
+	// Upper bound on the NextAuth session cookie. Connect's token expires on its own (usually sooner); the
+	// jwt callback below enforces that exact expiry per-user, so this is just a coarse backstop that keeps a
+	// cookie from outliving its token by weeks (NextAuth defaults to 30 days).
+	session: { strategy: "jwt", maxAge: 7 * 24 * 60 * 60 },
 	callbacks: {
 		// Reject an OAuth sign-in that Connect won't accept (suspended account, or no email on a
 		// first-time sign-in) instead of creating a session with no customer behind it.
@@ -123,6 +126,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				token.accessToken = customer.accessToken ?? undefined;
 				token.accessTokenExpires = customer.expiresAt ? new Date(customer.expiresAt).getTime() : undefined;
 			}
+
+			// The Connect token has its own, shorter lifetime than the session cookie, and the SDK offers no
+			// refresh. Once it's expired every Bearer call returns empty, which would leave the user looking
+			// signed in while nothing loads. Returning null here tears the session down so they land back on
+			// login instead of in that dead state.
+			const expires = token.accessTokenExpires;
+			if (typeof expires === "number" && expires <= Date.now()) return null;
+
 			return token;
 		},
 		session: ({ session, token }) => {
