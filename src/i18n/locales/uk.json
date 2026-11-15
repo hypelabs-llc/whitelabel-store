@@ -136,9 +136,11 @@
 		"colAuth": "Автентифікація",
 		"colRotation": "Ротація IP",
 		"expiresIn": "Спливає через {{time}}",
-		"fromOrder": "із",
+		"fromOrder": "Замовлення",
 		"timeLeft": "залишилось {{time}}",
-		"proxyOptions": "Налаштування проксі"
+		"proxyOptions": "Налаштування проксі",
+		"autoRenew": "Автопоновлення",
+		"gracePeriod": "Пільговий період"
 	},
 	"extendDialog": {
 		"title": "Продовжити покупку",
@@ -283,6 +285,8 @@
 		"days": "{{count}} дн",
 		"hours": "{{count}} год",
 		"minutes": "{{count}} хв.",
+		"years": "{{count}} р",
+		"months": "{{count}} міс",
 		"trial": "Пробна версія",
 		"extend": "Продовжити",
 		"cancel": "Скасувати"

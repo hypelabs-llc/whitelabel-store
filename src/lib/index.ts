@@ -1,5 +1,5 @@
 import axios from "axios";
-import { format, differenceInDays, differenceInHours, differenceInMinutes, isValid } from "date-fns";
+import { format, differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths, differenceInYears, isValid } from "date-fns";
 import type { Order, Plain } from "@hypelabs-llc/ts-sdk";
 
 // JSX helpers live in ./utils; re-export them so `@/lib` stays the single import surface.
@@ -60,10 +60,15 @@ export const formatPrice = (amount: number, currency: string = "USD", fractionDi
 		maximumFractionDigits: fractionDigits,
 	}).format(amount);
 
-// Time remaining as the finest useful unit: days when >= 1 day, else hours when >= 1 hour, else minutes
-// (so something expiring in under an hour shows "45m" rather than "0h"). Clamped at zero.
-export const timeLeft = (expiresAt: Date): { value: number; unit: "days" | "hours" | "minutes" } => {
+// Time remaining as the coarsest readable unit, so a year-long order reads "1y" rather than "365d":
+// years when >= 1 year, else months when >= 1 month, else days, else hours, else minutes (so something
+// expiring in under an hour shows "45m" rather than "0h"). Calendar-aware via date-fns. Clamped at zero.
+export const timeLeft = (expiresAt: Date): { value: number; unit: "years" | "months" | "days" | "hours" | "minutes" } => {
 	const now = new Date();
+	const years = differenceInYears(expiresAt, now);
+	if (years >= 1) return { value: years, unit: "years" };
+	const months = differenceInMonths(expiresAt, now);
+	if (months >= 1) return { value: months, unit: "months" };
 	const days = differenceInDays(expiresAt, now);
 	if (days >= 1) return { value: days, unit: "days" };
 	const hours = differenceInHours(expiresAt, now);

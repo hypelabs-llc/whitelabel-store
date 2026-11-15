@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardList, Copy, Globe, Info, KeyRound, Loader2, Pencil, Settings2, Sparkles, Timer } from "lucide-react";
+import { AlertTriangle, ClipboardList, Copy, Globe, Info, KeyRound, Loader2, Pencil, RefreshCw, Settings2, Sparkles, Timer } from "lucide-react";
 import UpdateCommentDialog from "./UpdateCommentDialog";
 import { Badge, Button, Card, Tooltip } from "@/components/ui";
 import { CheckProxyButton } from "./CheckProxyButton";
@@ -53,8 +53,28 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 	const { data: orders = [] } = useSWR<Plain<Order>[]>("/api/orders", { suspense: false });
 	const holdsProxy = (candidate: Plain<Order>) => (candidate.items ?? []).some((item) => item.resourceIds?.includes(proxyId));
 	const order = orders.find((candidate) => candidate.isInactive !== true && holdsProxy(candidate)) ?? orders.find(holdsProxy);
-	const expiry = order?.expiresAt ? timeLeft(new Date(order.expiresAt)) : null;
-	const expiryTone = expiry ? (expiry.unit !== "days" ? "danger" : expiry.value <= 3 ? "danger" : expiry.value <= 7 ? "warning" : "success") : "neutral";
+	// The purchase badge reflects the order's lifecycle, in priority order:
+	//  - auto-renew: renews itself at expiry instead of lapsing, so a countdown would be misleading.
+	//  - grace period: already past expiresAt but the grace policy keeps the proxy alive, so a countdown
+	//    would show a negative "0m left"; flag it as a transient grace window instead.
+	//  - otherwise: the normal time-left countdown.
+	const isAutoRenew = order?.isAutoRenew === true;
+	const inGracePeriod = !isAutoRenew && order?.status === "GracePeriod";
+	const expiry = order?.expiresAt && !isAutoRenew && !inGracePeriod ? timeLeft(new Date(order.expiresAt)) : null;
+	// Tone by how close expiry is, not by unit size: plenty of runway (years/months, or more than a week of
+	// days) reads as the neutral brand accent — only the final stretch warms to amber then red. Hours/minutes
+	// means it's expiring within the day, so always danger.
+	const expiryTone = !expiry
+		? "neutral"
+		: expiry.unit === "years" || expiry.unit === "months"
+			? "brand"
+			: expiry.unit === "days"
+				? expiry.value <= 3
+					? "danger"
+					: expiry.value <= 7
+						? "warning"
+						: "brand"
+				: "danger";
 
 	const [commentOpen, setCommentOpen] = useState(false);
 	const [credentialsOpen, setCredentialsOpen] = useState(false);
@@ -111,13 +131,24 @@ export default function ProxyCard({ proxy, onReportIncident }: { proxy: Plain<Pr
 					</div>
 				</div>
 
-				{/* Purchase indicator: a compact one-line "time left" badge. The order id and trial flag ride
-				    along as a tooltip so the card stays uncluttered. */}
-				{order && expiry && (
+				{/* Purchase indicator: an "auto-renew" badge when the order renews itself, a "grace period" badge
+				    when it's past expiry but still held alive, otherwise a compact one-line "time left" badge. The
+				    order id and trial flag ride along as a tooltip so the card stays uncluttered. */}
+				{order && (isAutoRenew || inGracePeriod || expiry) && (
 					<Tooltip content={`${order.isTrial ? `${t("orders.trial")} · ` : ""}${t("proxies.fromOrder")} #${(order.id ?? "").split("-")[0]}`}>
-						<Badge tone={expiryTone} icon={Timer}>
-							<span className={"whitespace-nowrap"}>{t("proxies.timeLeft", { time: t(`orders.${expiry.unit}`, { count: expiry.value }) })}</span>
-						</Badge>
+						{isAutoRenew ? (
+							<Badge tone={"brand"} icon={RefreshCw}>
+								<span className={"whitespace-nowrap"}>{t("proxies.autoRenew")}</span>
+							</Badge>
+						) : inGracePeriod ? (
+							<Badge tone={"danger"} icon={AlertTriangle}>
+								<span className={"whitespace-nowrap"}>{t("proxies.gracePeriod")}</span>
+							</Badge>
+						) : (
+							<Badge tone={expiryTone} icon={Timer}>
+								<span className={"whitespace-nowrap"}>{t("proxies.timeLeft", { time: t(`orders.${expiry!.unit}`, { count: expiry!.value }) })}</span>
+							</Badge>
+						)}
 					</Tooltip>
 				)}
 			</div>

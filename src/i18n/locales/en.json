@@ -132,9 +132,11 @@
 		"colAuth": "Authentication",
 		"colRotation": "IP Rotation",
 		"expiresIn": "Expires in {{time}}",
-		"fromOrder": "from",
+		"fromOrder": "Order",
 		"timeLeft": "{{time}} left",
-		"proxyOptions": "Proxy options"
+		"proxyOptions": "Proxy options",
+		"autoRenew": "Auto-renew",
+		"gracePeriod": "Grace period"
 	},
 	"extendDialog": {
 		"title": "Extend Purchase",
@@ -279,6 +281,8 @@
 		"days": "{{count}}d",
 		"hours": "{{count}}h",
 		"minutes": "{{count}}m",
+		"years": "{{count}}y",
+		"months": "{{count}}mo",
 		"trial": "Trial",
 		"extend": "Extend",
 		"cancel": "Cancel"

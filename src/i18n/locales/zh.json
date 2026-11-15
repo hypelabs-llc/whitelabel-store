@@ -128,9 +128,11 @@
 		"colAuth": "认证",
 		"colRotation": "IP 轮换",
 		"expiresIn": "{{time}}后到期",
-		"fromOrder": "来自",
+		"fromOrder": "订单",
 		"timeLeft": "剩余 {{time}}",
-		"proxyOptions": "代理选项"
+		"proxyOptions": "代理选项",
+		"autoRenew": "自动续订",
+		"gracePeriod": "宽限期"
 	},
 	"extendDialog": {
 		"title": "续期订单",
@@ -275,6 +277,8 @@
 		"days": "{{count}} 天",
 		"hours": "{{count}} 小时",
 		"minutes": "{{count}} 分钟",
+		"years": "{{count}} 年",
+		"months": "{{count}} 个月",
 		"trial": "试用",
 		"extend": "续订",
 		"cancel": "取消"

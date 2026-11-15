@@ -132,9 +132,11 @@
 		"colAuth": "Autenticação",
 		"colRotation": "Rotação de IP",
 		"expiresIn": "Expira em {{time}}",
-		"fromOrder": "de",
+		"fromOrder": "Pedido",
 		"timeLeft": "{{time}} restantes",
-		"proxyOptions": "Opções do proxy"
+		"proxyOptions": "Opções do proxy",
+		"autoRenew": "Renovação automática",
+		"gracePeriod": "Período de carência"
 	},
 	"extendDialog": {
 		"title": "Estender compra",
@@ -279,6 +281,8 @@
 		"days": "{{count}}d",
 		"hours": "{{count}}h",
 		"minutes": "{{count}}m",
+		"years": "{{count}}a",
+		"months": "{{count}}mes",
 		"trial": "Teste",
 		"extend": "Estender",
 		"cancel": "Cancelar"

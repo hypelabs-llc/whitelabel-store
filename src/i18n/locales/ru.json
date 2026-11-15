@@ -136,9 +136,11 @@
 		"colAuth": "Аутентификация",
 		"colRotation": "Ротация IP",
 		"expiresIn": "Истекает через {{time}}",
-		"fromOrder": "из",
+		"fromOrder": "Заказ",
 		"timeLeft": "осталось {{time}}",
-		"proxyOptions": "Настройки прокси"
+		"proxyOptions": "Настройки прокси",
+		"autoRenew": "Автопродление",
+		"gracePeriod": "Льготный период"
 	},
 	"extendDialog": {
 		"title": "Продление заказа",
@@ -283,6 +285,8 @@
 		"days": "{{count}} дн.",
 		"hours": "{{count}} ч.",
 		"minutes": "{{count}} мин.",
+		"years": "{{count}} г.",
+		"months": "{{count}} мес.",
 		"trial": "Пробный",
 		"extend": "Продлить",
 		"cancel": "Отменить"
