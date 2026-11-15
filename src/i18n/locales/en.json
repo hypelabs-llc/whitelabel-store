@@ -263,6 +263,8 @@
 	"orders": {
 		"title": "My Orders",
 		"subtitle": "View your order history and active purchases.",
+		"activeOrders": "Active orders",
+		"inactiveOrders": "Inactive orders",
 		"loading": "Loading...",
 		"empty": "No Orders Yet",
 		"emptyHint": "Your orders will appear here once you place your first order.",
@@ -284,6 +286,7 @@
 		"years": "{{count}}y",
 		"months": "{{count}}mo",
 		"trial": "Trial",
+		"order": "Order",
 		"extend": "Extend",
 		"cancel": "Cancel"
 	},

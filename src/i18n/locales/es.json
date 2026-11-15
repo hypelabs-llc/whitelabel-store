@@ -263,6 +263,8 @@
 	"orders": {
 		"title": "Mis pedidos",
 		"subtitle": "Consulta tu historial de pedidos y tus compras activas.",
+		"activeOrders": "Pedidos activos",
+		"inactiveOrders": "Pedidos inactivos",
 		"loading": "Cargando...",
 		"empty": "Aún no hay pedidos",
 		"emptyHint": "Tus pedidos aparecerán aquí cuando realices tu primer pedido.",
@@ -284,6 +286,7 @@
 		"years": "{{count}} a",
 		"months": "{{count}} mes",
 		"trial": "Prueba",
+		"order": "Pedido",
 		"extend": "Extender",
 		"cancel": "Cancelar"
 	},

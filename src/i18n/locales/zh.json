@@ -259,6 +259,8 @@
 	"orders": {
 		"title": "我的订单",
 		"subtitle": "查看您的订单历史和有效订单。",
+		"activeOrders": "活跃订单",
+		"inactiveOrders": "非活跃订单",
 		"loading": "加载中...",
 		"empty": "暂无订单",
 		"emptyHint": "您的订单将在首次下单后显示在此处。",
@@ -280,6 +282,7 @@
 		"years": "{{count}} 年",
 		"months": "{{count}} 个月",
 		"trial": "试用",
+		"order": "订单",
 		"extend": "续订",
 		"cancel": "取消"
 	},
