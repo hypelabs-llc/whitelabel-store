@@ -118,9 +118,32 @@ export const statusTone = (status: string): "neutral" | "success" | "warning" | 
 			return "warning";
 		case "Expired":
 		case "Cancelled":
+		case "Deleted":
 			return "danger";
 		default:
 			return "neutral";
+	}
+};
+
+// i18n key for a status's human label, so the status pill never shows the raw enum ("GracePeriod") and
+// reads the same, translated, wherever it's shown. Unknown statuses fall back to the raw string via the
+// caller (t() with a defaultValue), so a new SDK status degrades to its enum name rather than a blank.
+export const statusLabelKey = (status: string): string => {
+	switch (status) {
+		case "Active":
+			return "orders.statusActive";
+		case "Pending":
+			return "orders.statusPending";
+		case "GracePeriod":
+			return "orders.statusGracePeriod";
+		case "Expired":
+			return "orders.statusExpired";
+		case "Cancelled":
+			return "orders.statusCancelled";
+		case "Deleted":
+			return "orders.statusDeleted";
+		default:
+			return "orders.statusUnknown";
 	}
 };
 

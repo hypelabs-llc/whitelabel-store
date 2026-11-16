@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Badge, Button, EmptyState, Heading } from "@/components/ui";
-import { AlertTriangle, History, Package, RefreshCw, ShoppingCart, Timer, XCircle } from "lucide-react";
+import { History, Package, RefreshCw, ShoppingCart, Timer, XCircle } from "lucide-react";
 import useSWR from "swr";
-import { CopyableId, formatDate, orderBadge, resourceCount, statusTone } from "@/lib";
+import { CopyableId, formatDate, orderBadge, resourceCount, statusLabelKey, statusTone } from "@/lib";
+import { STATUS_ICONS } from "@/constants";
 import Link from "next/link";
 import type { Order, Plain } from "@hypelabs-llc/ts-sdk";
 import ExtendOrderDialog from "./ExtendOrderDialog";
@@ -62,14 +63,15 @@ export default function OrdersList() {
 				<td className={"px-5 py-3 text-fg"}>{formatDate(order.expiresAt)}</td>
 				<td className={"px-5 py-3"}>
 					<div className={"inline-flex items-center gap-2"}>
-						<Badge tone={statusTone(status)}>{status}</Badge>
+						{/* One humanized, translated status pill for every status — no raw enum, and grace period
+						    lives here instead of as a second badge. Auto-renew and time-left stay separate
+						    because they add information the status alone doesn't carry. */}
+						<Badge tone={statusTone(status)} icon={STATUS_ICONS[status]}>
+							{t(statusLabelKey(status), { defaultValue: status })}
+						</Badge>
 						{badge?.kind === "auto-renew" ? (
 							<Badge tone={"brand"} icon={RefreshCw}>
 								{t("proxies.autoRenew")}
-							</Badge>
-						) : badge?.kind === "grace" ? (
-							<Badge tone={"danger"} icon={AlertTriangle}>
-								{t("proxies.gracePeriod")}
 							</Badge>
 						) : badge?.kind === "time-left" && status === "Active" ? (
 							<Badge tone={badge.tone} icon={Timer}>
