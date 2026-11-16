@@ -108,14 +108,16 @@ export function OrderBuilder() {
 
 	// Live price preview whenever the full selection or quantity/cycle changes.
 	useEffect(() => {
-		if (!productId || !locationId || !ispId) {
-			setPreview(null);
-			return;
-		}
+		// Selection momentarily incomplete (e.g. changing the location nulls the ISP for one render before the
+		// next one preselects): keep the last good preview instead of clearing it. Clearing would drop to the
+		// "USD"/basePrice fallbacks below and flash a wrong-currency catalog price between two valid previews.
+		if (!productId || !locationId || !ispId) return;
 		let cancelled = false;
 		previewOrder({ productId, locationId, ispId, quantity, billingCycle, capabilities: selectedCapabilities })
-			.then((p) => !cancelled && setPreview(p))
-			.catch(() => !cancelled && setPreview(null));
+			.then((result) => !cancelled && result && setPreview(result))
+			// Keep the last good preview on a transient error rather than dropping back to the "USD"/basePrice
+			// fallbacks below — that fallback flashes a wrong-currency price between two valid previews.
+			.catch(() => {});
 		return () => {
 			cancelled = true;
 		};
