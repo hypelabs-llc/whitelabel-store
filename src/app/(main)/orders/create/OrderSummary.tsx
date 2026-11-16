@@ -87,11 +87,14 @@ export function OrderSummary({
 			<div className="mt-6 space-y-2 border-t border-line pt-4 text-sm">
 				<div className="flex justify-between">
 					<span className="text-muted">{t("orderDialog.unitPrice")}</span>
-					<span className="font-medium text-fg">{formatPrice(unitPrice, currency)}</span>
+					{/* No price until the first preview resolves — its currency is the only source of truth, so
+					    showing the catalog basePrice here would flash a wrong-currency amount. Fall back to the
+					    same "—" placeholder the ISP line uses. */}
+					<span className="font-medium text-fg">{preview ? formatPrice(unitPrice, currency) : "—"}</span>
 				</div>
 				<div className="flex justify-between">
 					<span className="text-muted">{t("orderDialog.subtotal")}</span>
-					<span className="font-medium text-fg">{formatPrice(preview?.subtotal ?? unitPrice * quantity, currency)}</span>
+					<span className="font-medium text-fg">{preview ? formatPrice(preview.subtotal ?? unitPrice * quantity, currency) : "—"}</span>
 				</div>
 				{preview?.discount ? (
 					<div className="flex justify-between text-emerald-600 dark:text-emerald-400">
@@ -132,7 +135,7 @@ export function OrderSummary({
 
 			<div className="mt-4 flex items-end justify-between border-t border-line pt-4">
 				<span className="text-xs font-semibold uppercase tracking-widest text-muted">{t("orderDialog.total")}</span>
-				<span className="text-3xl font-bold text-fg-strong">{formatPrice(total, currency)}</span>
+				<span className="text-3xl font-bold text-fg-strong">{preview ? formatPrice(total, currency) : "—"}</span>
 			</div>
 
 			<div className="mt-6">
