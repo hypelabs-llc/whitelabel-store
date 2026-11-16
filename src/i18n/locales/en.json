@@ -135,8 +135,8 @@
 		"fromOrder": "Order",
 		"timeLeft": "{{time}} left",
 		"proxyOptions": "Proxy options",
-		"autoRenew": "Auto-renew",
-		"gracePeriod": "Grace period"
+		"autoRenew": "Auto-Renew",
+		"gracePeriod": "Grace Period"
 	},
 	"extendDialog": {
 		"title": "Extend Purchase",
